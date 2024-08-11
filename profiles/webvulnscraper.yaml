@@ -1,0 +1,105 @@
+# example_profile.yaml
+# This file defines the configuration for interacting with the GPT API.
+# It includes all necessary parameters, with the actual API keys stored in a separate keys.yaml file.
+
+
+model: gpt-4o-mini-2024-07-18
+#model: gpt-4o-2024-08-06
+# Model to be used. This ensures consistency in the responses.
+
+api_url: https://api.openai.com/v1/engines/gpt-4o-mini/completions
+# The endpoint URL for the OpenAI API call.
+
+credentials_file: ./keys.yaml
+# External file where API keys are stored. This keeps the main configuration secure and clean.
+
+system_prompt: |
+  You are a web scraper focused on collecting threat intelligence data from various sources on the internet. Depending on the content of the webpage, dynamically determine whether you are in "link aggregation" or "data scraping" mode.
+
+  1. Link Aggregation Mode:
+     - Identify and collect links from hubs, directories, or indexes of threat intelligence reports, indicators of compromise (IOCs), or related resources.
+     - For each link, return the URL, a brief description of the expected threat intelligence content (e.g., "APT report", "malware analysis", "phishing indicators"), and the source or method of how the link was found (e.g., "from main navigation", "from a list of recent reports").
+
+  2. Data Scraping Mode:
+     - Extract the main content from the current page focused on threat intelligence, such as details about specific threats, attack techniques, or IOCs. Ignore ads, distractions, or unrelated content.
+     - Return the page title, the extracted content, and the source context of where the content was extracted from on the page (e.g., "main report body", "analysis section", "IOC table").
+
+  Determine the appropriate mode after analyzing the webpage and return the structured data accordingly.
+
+parameters:
+  max_tokens: 2000
+  temperature: 0.75
+  top_p: 1.0
+  n: 1
+  stop: None
+  # All OpenAI API parameters are defined here to maintain consistency. 
+  # max_tokens limits the response length, temperature controls creativity, top_p adjusts diversity, 
+  # and n defines the number of response choices.
+
+structured_output:
+  name: ThreatIntelligenceScraperSchema
+  enable: true
+  strict: true
+  schema:
+    type: object
+    properties:
+      mode:
+        type: string
+        description: "Determines if the scraper is in 'link aggregation' or 'data scraping' mode."
+        enum:
+          - link_aggregation
+          - data_scraping
+      linkAggregation:
+        type: object
+        description: "Details of the 'link aggregation' mode."
+        properties:
+          links:
+            type: array
+            description: "A list of URLs collected during the 'link aggregation' process."
+            items:
+              type: object
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: "The URL of the link found."
+                description:
+                  type: string
+                  description: "A brief description of the threat intelligence content expected at the URL (e.g., 'APT report', 'malware analysis', 'phishing indicators')."
+                source:
+                  type: string
+                  description: "The source or method used to find this link (e.g., 'from main navigation', 'from a list of recent reports')."
+              required:
+                - url
+                - description
+                - source
+        required:
+          - links
+      dataScraping:
+        type: object
+        description: "Details of the 'data scraping' mode."
+        properties:
+          title:
+            type: string
+            description: "The title of the page or main content being scraped."
+          content:
+            type: string
+            description: "The main content extracted from the page, focused on threat intelligence."
+          source:
+            type: string
+            description: "The source or context of where the content was extracted from on the page (e.g., 'main report body', 'analysis section', 'IOC table')."
+        required:
+          - title
+          - content
+          - source
+    required:
+      - mode
+
+logging:
+  enable: true
+  log_level: INFO
+  log_file: ./logs/api_calls.log
+# Logging configuration for debugging and auditing purposes. Helps in tracking and troubleshooting issues.
+
+timeout: 10
+# Timeout setting for the API call, ensuring the program doesn’t hang indefinitely.
