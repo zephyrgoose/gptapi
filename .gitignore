@@ -88,9 +88,6 @@ logs/
 *.env
 *.env.*
 
-# Profiles
-profiles/*.yaml
-
 # Python file generated from Jupyter Notebook
 *.ipynb_checkpoints/
 

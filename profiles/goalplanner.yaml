@@ -1,0 +1,82 @@
+# example_profile.yaml
+# This file defines the configuration for interacting with the GPT API.
+# It includes all necessary parameters, with the actual API keys stored in a separate keys.yaml file.
+
+
+model: gpt-4o-mini-2024-07-18
+#model: gpt-4o-2024-08-06
+# Model to be used. This ensures consistency in the responses.
+
+api_url: https://api.openai.com/v1/engines/gpt-4o-mini/completions
+# The endpoint URL for the OpenAI API call.
+
+credentials_file: ./keys.yaml
+# External file where API keys are stored. This keeps the main configuration secure and clean.
+
+system_prompt: |
+  You dilligently follow instructions.
+
+parameters:
+  max_tokens: 1000
+  temperature: 0.85
+  top_p: 1.0
+  n: 1
+  stop: None
+  # All OpenAI API parameters are defined here to maintain consistency. 
+  # max_tokens limits the response length, temperature controls creativity, top_p adjusts diversity, 
+  # and n defines the number of response choices.
+
+structured_output:
+  name: GoalPlanningSchema
+  enable: true
+  strict: true
+  schema: 
+    type: object
+    properties:
+      highLevelGoals:
+        type: array
+        description: "A list of categorized high-level goals, each with a title, category, and difficulty score."
+        items:
+          type: object
+          properties:
+            title:
+              type: string
+              description: "The title of the high-level goal."
+            category:
+              type: string
+              description: "The category or area this goal belongs to (e.g., Technology, Marketing, Operations)."
+            difficulty:
+              type: integer
+              description: "An estimate of how hard the goal is, from 1 to 10."
+              minimum: 1
+              maximum: 10
+          required: ["title", "category", "difficulty"]
+      nextSteps:
+        type: array
+        description: "A list of 5 distinct steps to achieve the high-level goals, each with a priority and target completion date."
+        items:
+          type: object
+          properties:
+            step:
+              type: string
+              description: "A specific action step to achieve the high-level goals."
+            priority:
+              type: integer
+              description: "The priority level of this step, from 1 (highest) to 5 (lowest)."
+              minimum: 1
+              maximum: 5
+            targetCompletionDate:
+              type: string
+              format: date-time
+              description: "The target date and time by which this step should be completed."
+          required: ["step", "priority", "targetCompletionDate"]
+    required: ["highLevelGoals", "nextSteps"]
+
+logging:
+  enable: true
+  log_level: INFO
+  log_file: ./logs/api_calls.log
+# Logging configuration for debugging and auditing purposes. Helps in tracking and troubleshooting issues.
+
+timeout: 10
+# Timeout setting for the API call, ensuring the program doesn’t hang indefinitely.

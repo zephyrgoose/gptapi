@@ -127,5 +127,5 @@ def gptapi(profile, prompt):
         raise SystemExit("An unexpected error occurred. Please try again later.")
 
 # Example Usage
-result = gptapi('goalplanner', "Formulate a plan for beginning a small enterprise technology architecture consulting firm.")
-print(result)
+#result = gptapi('goalplanner', "Formulate a plan for beginning a small enterprise technology architecture consulting firm.")
+#print(result)
