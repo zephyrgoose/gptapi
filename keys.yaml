@@ -1,5 +1,0 @@
-# keys.yaml
-# Store sensitive credentials here. This file should be securely managed and not shared publicly.
-
-api_key: sk-your-api-key-here
-# Your OpenAI API key. Ensure this file is protected and access is controlled.
