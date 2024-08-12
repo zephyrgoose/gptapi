@@ -84,7 +84,7 @@ structured_output:
             description: "The title of the page or main content being scraped."
           content:
             type: string
-            description: "The main content extracted from the page, focused on threat intelligence - succinct, but technically detailed."
+            description: "The main content succinctly extracted from the page, focused on threat intelligence."
           summary:
             type: string
             description: "A technically and factually dense, succinct, lossless summary of the main content extracted from the page, with a focus on threat intelligence."
