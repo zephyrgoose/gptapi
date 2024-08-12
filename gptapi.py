@@ -7,6 +7,14 @@ import jsonschema
 from pathlib import Path
 from pydantic import BaseModel, create_model, ValidationError
 
+# Global constants and variables
+CREDENTIALS_FILE = 'keys.yaml'
+CREDENTIALS_KEY = 'openai_api'
+PROFILES_DIR = 'profiles'
+LOG_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
+DEFAULT_PROP_TYPE = str
+DEFAULT_MODEL_NAME = 'StructuredOutputModel'
+
 def load_yaml(file_path):
     """Load a YAML file and return its contents as a dictionary."""
     try:
@@ -19,26 +27,28 @@ def load_yaml(file_path):
 def setup_logging(log_file, log_level):
     """Set up logging configuration, ensuring the log directory exists."""
     log_dir = Path(log_file).parent
-    if not log_dir.exists():
-        os.makedirs(log_dir)
+    log_dir.mkdir(parents=True, exist_ok=True)  # This will create the directory only if it doesn't exist
 
     logging.basicConfig(filename=log_file,
                         level=log_level,
-                        format='%(asctime)s - %(levelname)s - %(message)s')
+                        format=LOG_FORMAT)
 
-def create_openai_client(credentials_file):
+def create_openai_client(credentials_file=CREDENTIALS_FILE):
     """Create an instance of the OpenAI client using credentials from a YAML file."""
-    credentials = load_yaml(credentials_file)
-    return openai.OpenAI(api_key=credentials['openai_api'])
+    current_dir = Path(__file__).parent
+    credentials_path = current_dir / credentials_file  # Directly pointing to the keys.yaml in the gptapi submodule
+    credentials = load_yaml(credentials_path)
+    return openai.OpenAI(api_key=credentials[CREDENTIALS_KEY])
+
 
 def generate_pydantic_model(schema):
     """Dynamically generate a Pydantic model based on the provided JSON schema."""
     properties = {}
     for prop, details in schema['properties'].items():
-        prop_type = str  # Default to string; you can extend this with more types if needed
+        prop_type = DEFAULT_PROP_TYPE  # Default to string; you can extend this with more types if needed
         properties[prop] = (prop_type, ...)
     
-    return create_model('StructuredOutputModel', **properties)
+    return create_model(DEFAULT_MODEL_NAME, **properties)
 
 def gptapi(profile, prompt):
     """
@@ -52,8 +62,9 @@ def gptapi(profile, prompt):
     - dict or str: The API response content, either as a dict (structured) or a string.
     """
     try:
-        # Load the profile configuration
-        profile_path = Path(f"./profiles/{profile}.yaml")
+        # Adjust the profile path to be relative to the current file's location
+        current_dir = Path(__file__).parent
+        profile_path = current_dir / PROFILES_DIR / f"{profile}.yaml"
         config = load_yaml(profile_path)
 
         # Setup logging
@@ -114,7 +125,7 @@ def gptapi(profile, prompt):
             raise ValueError("Empty response from API.")
 
         # Log the successful API call
-        logging.info("API call successful: %s", result)
+        logging.debug("API call successful: %s", result)
 
         return result
 
