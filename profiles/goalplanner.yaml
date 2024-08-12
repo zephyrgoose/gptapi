@@ -22,9 +22,8 @@ parameters:
   top_p: 1.0
   n: 1
   stop: None
-  # All OpenAI API parameters are defined here to maintain consistency. 
-  # max_tokens limits the response length, temperature controls creativity, top_p adjusts diversity, 
-  # and n defines the number of response choices.
+  frequency_penalty: 0.0  # Controls how much the model penalises new tokens based on their existing frequency in the text so far.
+  presence_penalty: 0.0   # Controls how much the model penalises new tokens based on whether they appear in the text so far.
 
 structured_output:
   name: GoalPlanningSchema

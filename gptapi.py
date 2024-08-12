@@ -62,25 +62,33 @@ def gptapi(profile, prompt):
     - dict or str: The API response content, either as a dict (structured) or a string.
     """
     try:
-        # Adjust the profile path to be relative to the current file's location
         current_dir = Path(__file__).parent
         profile_path = current_dir / PROFILES_DIR / f"{profile}.yaml"
         config = load_yaml(profile_path)
 
-        # Setup logging
         if config['logging']['enable']:
             setup_logging(config['logging']['log_file'], config['logging']['log_level'])
 
-        # Create OpenAI client
         client = create_openai_client(config['credentials_file'])
 
-        # Prepare the messages array
         messages = [
             {"role": "system", "content": config['system_prompt']},
             {"role": "user", "content": prompt}
         ]
 
-        # Check if structured output is enabled and set up function calling
+        # Prepare additional parameters
+        parameters = {
+            "model": config['model'],
+            "messages": messages,
+            "max_tokens": config['parameters']['max_tokens'],
+            "temperature": config['parameters']['temperature'],
+            "top_p": config['parameters']['top_p'],
+            "n": config['parameters']['n'],
+            "stop": config['parameters'].get('stop', None),
+            "frequency_penalty": config['parameters'].get('frequency_penalty', 0.0),
+            "presence_penalty": config['parameters'].get('presence_penalty', 0.0)
+        }
+
         if config.get('structured_output', {}).get('enable'):
             function_name = "format_response"
             function_schema = config['structured_output']['schema']
@@ -93,30 +101,16 @@ def gptapi(profile, prompt):
                 }
             ]
 
-            completion = client.chat.completions.create(
-                model=config['model'],
-                messages=messages,
-                max_tokens=config['parameters']['max_tokens'],
-                temperature=config['parameters']['temperature'],
-                top_p=config['parameters']['top_p'],
-                n=config['parameters']['n'],
-                stop=config['parameters'].get('stop', None),
-                functions=functions,
-                function_call={"name": function_name}
-            )
+            parameters.update({
+                "functions": functions,
+                "function_call": {"name": function_name}
+            })
 
-            # Assuming the model returns the structured output directly
+            completion = client.chat.completions.create(**parameters)
+
             result = completion.choices[0].message.function_call.arguments
         else:
-            completion = client.chat.completions.create(
-                model=config['model'],
-                messages=messages,
-                max_tokens=config['parameters']['max_tokens'],
-                temperature=config['parameters']['temperature'],
-                top_p=config['parameters']['top_p'],
-                n=config['parameters']['n'],
-                stop=config['parameters'].get('stop', None)
-            )
+            completion = client.chat.completions.create(**parameters)
 
             result = completion.choices[0].message.content
 
@@ -124,10 +118,17 @@ def gptapi(profile, prompt):
             logging.error("Received empty response from API.")
             raise ValueError("Empty response from API.")
 
-        # Log the successful API call
         logging.debug("API call successful: %s", result)
 
         return result
+
+    except ValidationError as e:
+        logging.error("ValidationError: %s", e)
+        raise SystemExit("Validation error. Please check the structured output schema.")
+
+    except Exception as e:
+        logging.error("An unexpected error occurred: %s", e)
+        raise SystemExit("An unexpected error occurred. Please try again later.")
 
     except ValidationError as e:
         logging.error("ValidationError: %s", e)

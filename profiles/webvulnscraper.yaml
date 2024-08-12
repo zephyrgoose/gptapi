@@ -2,13 +2,9 @@
 # This file defines the configuration for interacting with the GPT API.
 # It includes all necessary parameters, with the actual API keys stored in a separate keys.yaml file.
 
-
+# Model to be used. 
 model: gpt-4o-mini-2024-07-18
 #model: gpt-4o-2024-08-06
-# Model to be used. This ensures consistency in the responses.
-
-api_url: https://api.openai.com/v1/engines/gpt-4o-mini/completions
-# The endpoint URL for the OpenAI API call.
 
 credentials_file: ./keys.yaml
 # External file where API keys are stored. This keeps the main configuration secure and clean.
@@ -29,12 +25,11 @@ system_prompt: |
 parameters:
   max_tokens: 3000
   temperature: 0.75
-  top_p: 1.0
+  top_p: 0.9
   n: 1
   stop: None
-  # All OpenAI API parameters are defined here to maintain consistency. 
-  # max_tokens limits the response length, temperature controls creativity, top_p adjusts diversity, 
-  # and n defines the number of response choices.
+  frequency_penalty: 0.0  # Controls how much the model penalises new tokens based on their existing frequency in the text so far.
+  presence_penalty: 0.0 # Controls how much the model penalises new tokens based on whether they appear in the text so far.
 
 structured_output:
   name: ThreatIntelligenceScraperSchema
@@ -93,7 +88,7 @@ structured_output:
             description: "Indicates if the content is of the highest significance importance or relevance - if we as a competent security team with safeguards in place act RIGHT NOW."
           threatBreakdown:
             type: array
-            description: "A breakdown of specific threats, exploits, or concerns mentioned in the content."
+            description: "A breakdown of specific threats, exploits, or concerns mentioned in the content - this can be anywhere from 1 or 2, to 50."
             items:
               type: object
               description: "Each item in the array represents a specific threat or exploit, including details on its type, specificity, and severity."
