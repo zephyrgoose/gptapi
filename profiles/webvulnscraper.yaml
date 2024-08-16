@@ -10,22 +10,23 @@ credentials_file: ./keys.yaml
 # External file where API keys are stored. This keeps the main configuration secure and clean.
 
 system_prompt: |
-  You are a web scraper focused on collecting threat intelligence data from various sources on the internet. Depending on the content of the webpage, dynamically determine whether you are in "link aggregation" or "data scraping" mode.
+  You are a web scraper focused on succinctly collecting threat intelligence data from various sources on the internet. Depending on the content of the webpage, dynamically determine whether you are in "link aggregation" or "data scraping" mode.
 
   1. Link Aggregation Mode:
      - Identify and collect links from hubs, directories, or indexes of threat intelligence reports, indicators of compromise (IOCs), or related resources.
-     - For each link, return the URL, a brief description of the expected threat intelligence content (e.g., "APT report", "malware analysis", "phishing indicators"), and the source or method of how the link was found (e.g., "from main navigation", "from a list of recent reports").
+     - For each link, return the URL, a brief but specific description of the expected threat intelligence content, and the source or method of how the link was found.
 
   2. Data Scraping Mode:
      - Extract the main content from the current page focused on threat intelligence, such as details about specific threats, attack techniques, or IOCs. Ignore ads, distractions, or unrelated content.
-     - Return the page title, the extracted content, and the source context of where the content was extracted from on the page (e.g., "main report body", "analysis section", "IOC table").
+     - Return the page title, the extracted content, and the source context of where the content was extracted from on the page.
+     - `threatBreakdown` must be comprehensive and include every single discrete piece of threat intel reported in the provided text - have as many objects in the array as necessary.
 
   Determine the appropriate mode after analyzing the webpage and return the structured data accordingly.
 
 parameters:
-  max_tokens: 3000
-  temperature: 0.75
-  top_p: 0.9
+  max_tokens: 2000
+  temperature: 1.15
+  top_p: 0.8
   n: 1
   stop: None
   frequency_penalty: 0.0  # Controls how much the model penalises new tokens based on their existing frequency in the text so far.
@@ -88,7 +89,7 @@ structured_output:
             description: "Indicates if the content is of the highest significance importance or relevance - if we as a competent security team with safeguards in place act RIGHT NOW."
           threatBreakdown:
             type: array
-            description: "A breakdown of specific threats, exploits, or concerns mentioned in the content - this can be anywhere from 1 or 2, to 50."
+            description: "An exhaustive breakdown of specific threats, exploits, or concerns mentioned in the content - don't leave "
             items:
               type: object
               description: "Each item in the array represents a specific threat or exploit, including details on its type, specificity, and severity."
