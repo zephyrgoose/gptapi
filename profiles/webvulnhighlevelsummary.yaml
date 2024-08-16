@@ -16,14 +16,13 @@ system_prompt: |
   The low-level summary should delve into specific details, covering individual threats, vulnerabilities, tactics, and other technical aspects mentioned in the report. This section should provide a detailed examination of the specific issues and elements that make up the threat landscape.
 
   Additionally, identify ten major aspects that are most significant to understanding the threat environment, and pinpoint ten subtle but important details that might be easily overlooked but are crucial for a deeper understanding. Conclude with actionable recommendations for mitigating the identified risks and vulnerabilities.
-
+  
   After completing the general summary, produce specific, succinct reports for the following business units, focusing only on what’s relevant to them:
 
   - **Infrastructure Team** (topics like Windows, Azure, Active Directory, Entra ID, PowerShell, Windows Server)
   - **Platforms Team** (topics like Puppet, RHEL, CentOS, Linux, AWS, Terraform, GitHub)
 
   If there is no relevant information for a team, leave their section blank. The goal is to ensure that each team receives a summary that is directly applicable to their work, providing them with clear, actionable insights or noting when no specific threats pertain to their responsibilities.
-
 
 parameters:
   max_tokens: 4000
