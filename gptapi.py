@@ -3,11 +3,10 @@ import yaml
 import openai
 import logging
 import os
-import jsonschema
 from pathlib import Path
 from pydantic import BaseModel, create_model, ValidationError
 
-# Global constants and variables
+# Global Constants
 CREDENTIALS_FILE = 'keys.yaml'
 CREDENTIALS_KEY = 'openai_api'
 PROFILES_DIR = 'profiles'
@@ -15,68 +14,84 @@ LOG_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
 DEFAULT_PROP_TYPE = str
 DEFAULT_MODEL_NAME = 'StructuredOutputModel'
 
-def load_yaml(file_path):
-    """Load a YAML file and return its contents as a dictionary."""
-    try:
-        with open(file_path, 'r') as file:
-            return yaml.safe_load(file)
-    except yaml.YAMLError as e:
-        logging.error("Error loading YAML configuration: %s", e)
-        raise SystemExit("Failed to load configuration. Exiting.")
+class ConfigurationManager:
+    """Handles loading and caching of configuration files."""
+    _cache = {}
 
-def setup_logging(log_file, log_level):
-    """Set up logging configuration, ensuring the log directory exists."""
-    log_dir = Path(log_file).parent
-    log_dir.mkdir(parents=True, exist_ok=True)  # This will create the directory only if it doesn't exist
+    @classmethod
+    def load_yaml(cls, file_path):
+        if file_path not in cls._cache:
+            try:
+                with open(file_path, 'r') as file:
+                    cls._cache[file_path] = yaml.safe_load(file)
+            except yaml.YAMLError as e:
+                LoggerSetup.error(f"Error loading YAML configuration: {e}")
+                raise SystemExit("Failed to load configuration. Exiting.")
+        return cls._cache[file_path]
 
-    logging.basicConfig(filename=log_file,
-                        level=log_level,
-                        format=LOG_FORMAT)
+class LoggerSetup:
+    """Utility class for setting up logging."""
+    @staticmethod
+    def setup_logging(log_file, log_level):
+        log_dir = Path(log_file).parent
+        log_dir.mkdir(parents=True, exist_ok=True)
+        logging.basicConfig(filename=log_file, level=log_level, format=LOG_FORMAT)
 
-def create_openai_client(credentials_file=CREDENTIALS_FILE):
-    """Create an instance of the OpenAI client using credentials from a YAML file."""
-    current_dir = Path(__file__).parent
-    credentials_path = current_dir / credentials_file  # Directly pointing to the keys.yaml in the gptapi submodule
-    credentials = load_yaml(credentials_path)
-    return openai.OpenAI(api_key=credentials[CREDENTIALS_KEY])
+    @staticmethod
+    def error(message):
+        logging.error(message)
 
+class OpenAIClientManager:
+    """Manages the creation and use of the OpenAI client."""
+    def __init__(self, credentials_file=CREDENTIALS_FILE):
+        current_dir = Path(__file__).parent
+        credentials_path = current_dir / credentials_file
+        credentials = ConfigurationManager.load_yaml(credentials_path)
+        self.client = openai.OpenAI(api_key=credentials[CREDENTIALS_KEY])
 
-def generate_pydantic_model(schema):
-    """Dynamically generate a Pydantic model based on the provided JSON schema."""
-    properties = {}
-    for prop, details in schema['properties'].items():
-        prop_type = DEFAULT_PROP_TYPE  # Default to string; you can extend this with more types if needed
-        properties[prop] = (prop_type, ...)
-    
-    return create_model(DEFAULT_MODEL_NAME, **properties)
+    def create_completion(self, parameters):
+        return self.client.chat.completions.create(**parameters)
+
+class ModelFactory:
+    """Utility for creating Pydantic models."""
+    @staticmethod
+    def generate_pydantic_model(schema):
+        properties = {}
+        for prop, details in schema['properties'].items():
+            prop_type = DEFAULT_PROP_TYPE  # Extend this if needed
+            properties[prop] = (prop_type, ...)
+        return create_model(DEFAULT_MODEL_NAME, **properties)
+
+class CustomException(Exception):
+    """Custom exception for handling specific errors."""
+    pass
 
 def gptapi(profile, prompt):
     """
     Make an API call to OpenAI using the given profile and prompt, adhering to structured output if supported.
-
+    
     Parameters:
     - profile (str): The name of the YAML profile to use.
     - prompt (str): The prompt to send to the API.
-
+    
     Returns:
     - dict or str: The API response content, either as a dict (structured) or a string.
     """
     try:
         current_dir = Path(__file__).parent
         profile_path = current_dir / PROFILES_DIR / f"{profile}.yaml"
-        config = load_yaml(profile_path)
+        config = ConfigurationManager.load_yaml(profile_path)
 
         if config['logging']['enable']:
-            setup_logging(config['logging']['log_file'], config['logging']['log_level'])
+            LoggerSetup.setup_logging(config['logging']['log_file'], config['logging']['log_level'])
 
-        client = create_openai_client(config['credentials_file'])
+        openai_client = OpenAIClientManager(config['credentials_file'])
 
         messages = [
             {"role": "system", "content": config['system_prompt']},
             {"role": "user", "content": prompt}
         ]
 
-        # Prepare additional parameters
         parameters = {
             "model": config['model'],
             "messages": messages,
@@ -106,38 +121,29 @@ def gptapi(profile, prompt):
                 "function_call": {"name": function_name}
             })
 
-            completion = client.chat.completions.create(**parameters)
+        completion = openai_client.create_completion(parameters)
 
-            result = completion.choices[0].message.function_call.arguments
-        else:
-            completion = client.chat.completions.create(**parameters)
-
-            result = completion.choices[0].message.content
+        result = completion.choices[0].message.function_call.arguments if config.get('structured_output', {}).get('enable') else completion.choices[0].message.content
 
         if not result:
-            logging.error("Received empty response from API.")
-            raise ValueError("Empty response from API.")
+            raise CustomException("Received empty response from API.")
 
         logging.debug("API call successful: %s", result)
 
         return result
 
     except ValidationError as e:
-        logging.error("ValidationError: %s", e)
+        LoggerSetup.error(f"ValidationError: {e}")
         raise SystemExit("Validation error. Please check the structured output schema.")
 
-    except Exception as e:
-        logging.error("An unexpected error occurred: %s", e)
-        raise SystemExit("An unexpected error occurred. Please try again later.")
-
-    except ValidationError as e:
-        logging.error("ValidationError: %s", e)
-        raise SystemExit("Validation error. Please check the structured output schema.")
+    except CustomException as e:
+        LoggerSetup.error(str(e))
+        raise SystemExit(str(e))
 
     except Exception as e:
-        logging.error("An unexpected error occurred: %s", e)
+        LoggerSetup.error(f"An unexpected error occurred: {e}")
         raise SystemExit("An unexpected error occurred. Please try again later.")
 
 # Example Usage
-#result = gptapi('goalplanner', "Formulate a plan for beginning a small enterprise technology architecture consulting firm.")
-#print(result)
+# result = gptapi('goalplanner', "Formulate a plan for beginning a small enterprise technology architecture consulting firm.")
+# print(result)
