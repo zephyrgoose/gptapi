@@ -2,9 +2,8 @@ import json
 import yaml
 import openai
 import logging
-import os
 from pathlib import Path
-from pydantic import BaseModel, create_model, ValidationError
+from pydantic import create_model, ValidationError
 
 # Global Constants
 CREDENTIALS_FILE = 'keys.yaml'
@@ -21,25 +20,37 @@ class ConfigurationManager:
     @classmethod
     def load_yaml(cls, file_path):
         if file_path not in cls._cache:
-            try:
-                with open(file_path, 'r') as file:
-                    cls._cache[file_path] = yaml.safe_load(file)
-            except yaml.YAMLError as e:
-                LoggerSetup.error(f"Error loading YAML configuration: {e}")
-                raise SystemExit("Failed to load configuration. Exiting.")
+            cls._cache[file_path] = cls.load_file(file_path)
         return cls._cache[file_path]
 
-class LoggerSetup:
-    """Utility class for setting up logging."""
+    @staticmethod
+    def load_file(file_path):
+        try:
+            with open(file_path, 'r') as file:
+                return yaml.safe_load(file)
+        except yaml.YAMLError as e:
+            Logger.error(f"Error loading YAML configuration: {e}")
+            raise SystemExit("Failed to load configuration. Exiting.")
+
+class Logger:
+    """Singleton class for consistent logging setup."""
+    _configured = False
+
     @staticmethod
     def setup_logging(log_file, log_level):
-        log_dir = Path(log_file).parent
-        log_dir.mkdir(parents=True, exist_ok=True)
-        logging.basicConfig(filename=log_file, level=log_level, format=LOG_FORMAT)
+        if not Logger._configured:
+            log_dir = Path(log_file).parent
+            log_dir.mkdir(parents=True, exist_ok=True)
+            logging.basicConfig(filename=log_file, level=log_level, format=LOG_FORMAT)
+            Logger._configured = True
 
     @staticmethod
     def error(message):
         logging.error(message)
+    
+    @staticmethod
+    def debug(message):
+        logging.debug(message)
 
 class OpenAIClientManager:
     """Manages the creation and use of the OpenAI client."""
@@ -66,6 +77,49 @@ class CustomException(Exception):
     """Custom exception for handling specific errors."""
     pass
 
+class APICallPreparer:
+    """Prepares API call parameters based on configuration and user input."""
+    def __init__(self, config, prompt):
+        self.config = config
+        self.prompt = prompt
+
+    def prepare_parameters(self):
+        messages = [
+            {"role": "system", "content": self.config['system_prompt']},
+            {"role": "user", "content": self.prompt}
+        ]
+
+        parameters = {
+            "model": self.config['model'],
+            "messages": messages,
+            "max_tokens": self.config['parameters']['max_tokens'],
+            "temperature": self.config['parameters']['temperature'],
+            "top_p": self.config['parameters']['top_p'],
+            "n": self.config['parameters']['n'],
+            "stop": self.config['parameters'].get('stop', None),
+            "frequency_penalty": self.config['parameters'].get('frequency_penalty', 0.0),
+            "presence_penalty": self.config['parameters'].get('presence_penalty', 0.0)
+        }
+
+        if self.config.get('structured_output', {}).get('enable'):
+            function_name = "format_response"
+            function_schema = self.config['structured_output']['schema']
+
+            functions = [
+                {
+                    "name": function_name,
+                    "description": "Formats the response according to the specified schema.",
+                    "parameters": function_schema
+                }
+            ]
+
+            parameters.update({
+                "functions": functions,
+                "function_call": {"name": function_name}
+            })
+
+        return parameters
+
 def gptapi(profile, prompt):
     """
     Make an API call to OpenAI using the given profile and prompt, adhering to structured output if supported.
@@ -83,43 +137,11 @@ def gptapi(profile, prompt):
         config = ConfigurationManager.load_yaml(profile_path)
 
         if config['logging']['enable']:
-            LoggerSetup.setup_logging(config['logging']['log_file'], config['logging']['log_level'])
+            Logger.setup_logging(config['logging']['log_file'], config['logging']['log_level'])
 
         openai_client = OpenAIClientManager(config['credentials_file'])
-
-        messages = [
-            {"role": "system", "content": config['system_prompt']},
-            {"role": "user", "content": prompt}
-        ]
-
-        parameters = {
-            "model": config['model'],
-            "messages": messages,
-            "max_tokens": config['parameters']['max_tokens'],
-            "temperature": config['parameters']['temperature'],
-            "top_p": config['parameters']['top_p'],
-            "n": config['parameters']['n'],
-            "stop": config['parameters'].get('stop', None),
-            "frequency_penalty": config['parameters'].get('frequency_penalty', 0.0),
-            "presence_penalty": config['parameters'].get('presence_penalty', 0.0)
-        }
-
-        if config.get('structured_output', {}).get('enable'):
-            function_name = "format_response"
-            function_schema = config['structured_output']['schema']
-
-            functions = [
-                {
-                    "name": function_name,
-                    "description": "Formats the response according to the specified schema.",
-                    "parameters": function_schema
-                }
-            ]
-
-            parameters.update({
-                "functions": functions,
-                "function_call": {"name": function_name}
-            })
+        api_preparer = APICallPreparer(config, prompt)
+        parameters = api_preparer.prepare_parameters()
 
         completion = openai_client.create_completion(parameters)
 
@@ -127,21 +149,21 @@ def gptapi(profile, prompt):
 
         if not result:
             raise CustomException("Received empty response from API.")
-
-        logging.debug("API call successful: %s", result)
+            
+        Logger.debug(f"API call successful: {result}")
 
         return result
 
     except ValidationError as e:
-        LoggerSetup.error(f"ValidationError: {e}")
+        Logger.error(f"ValidationError: {e}")
         raise SystemExit("Validation error. Please check the structured output schema.")
 
     except CustomException as e:
-        LoggerSetup.error(str(e))
+        Logger.error(str(e))
         raise SystemExit(str(e))
 
     except Exception as e:
-        LoggerSetup.error(f"An unexpected error occurred: {e}")
+        Logger.error(f"An unexpected error occurred: {e}")
         raise SystemExit("An unexpected error occurred. Please try again later.")
 
 # Example Usage
