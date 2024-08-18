@@ -2,6 +2,7 @@ import json
 import yaml
 import openai
 import logging
+import tiktoken
 from pathlib import Path
 from pydantic import create_model, ValidationError
 
@@ -89,6 +90,17 @@ class APICallPreparer:
             {"role": "user", "content": self.prompt}
         ]
 
+        # Initialize tiktoken and count tokens
+        encoding = tiktoken.encoding_for_model(self.config['model'])
+        total_tokens = sum([len(encoding.encode(m['content'])) for m in messages])
+
+        # Check and log total tokens
+        Logger.debug(f"Total tokens in prepared messages: {total_tokens}")
+        
+        if total_tokens > self.config['parameters']['max_tokens']:
+            Logger.error("Token limit exceeded in message preparation. Consider splitting the prompt or reducing content.")
+            raise CustomException("Token limit exceeded.")
+
         parameters = {
             "model": self.config['model'],
             "messages": messages,
@@ -143,7 +155,21 @@ def gptapi(profile, prompt):
         api_preparer = APICallPreparer(config, prompt)
         parameters = api_preparer.prepare_parameters()
 
-        completion = openai_client.create_completion(parameters)
+        # Token-based batching logic
+        encoding = tiktoken.encoding_for_model(config['model'])
+        total_tokens = sum([len(encoding.encode(m['content'])) for m in parameters["messages"]])
+        Logger.debug(f"Total tokens before API call: {total_tokens}")
+
+        if total_tokens > config['parameters']['max_tokens']:
+            Logger.error("Token limit exceeded, splitting the request into smaller batches.")
+            # Implement logic to split `parameters["messages"]` into smaller batches
+            # For simplicity, pseudo-code:
+            # batches = split_into_batches(parameters["messages"], config['parameters']['max_tokens'])
+            # for batch in batches:
+            #     completion = openai_client.create_completion(batch)
+            #     # Aggregate results from all batches as necessary
+        else:
+            completion = openai_client.create_completion(parameters)
 
         result = completion.choices[0].message.function_call.arguments if config.get('structured_output', {}).get('enable') else completion.choices[0].message.content
 
@@ -161,6 +187,14 @@ def gptapi(profile, prompt):
     except CustomException as e:
         Logger.error(str(e))
         raise SystemExit(str(e))
+
+    except openai.error.InvalidRequestError as e:
+        if "context_length_exceeded" in str(e):
+            Logger.error("API request failed due to exceeding the token context length.")
+            raise SystemExit("Token context length exceeded. Please adjust the input.")
+        else:
+            Logger.error(f"Unexpected API error: {e}")
+            raise SystemExit("Unexpected API error. Please try again later.")
 
     except Exception as e:
         Logger.error(f"An unexpected error occurred: {e}")
