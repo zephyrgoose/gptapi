@@ -1,4 +1,4 @@
-# example_profile.yaml
+# webvulnscraper.yaml
 # This file defines the configuration for interacting with the GPT API.
 # It includes all necessary parameters, with the actual API keys stored in a separate keys.yaml file.
 
