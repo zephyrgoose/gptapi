@@ -13,6 +13,8 @@ PROFILES_DIR = 'profiles'
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
 DEFAULT_PROP_TYPE = str
 DEFAULT_MODEL_NAME = 'StructuredOutputModel'
+MAX_INPUT_TOKENS = 120000  # Global variable for maximum input tokens
+CUTS = 3  # Maximum number of cuts to handle large inputs
 
 class ConfigurationManager:
     """Handles loading and caching of configuration files."""
@@ -80,9 +82,10 @@ class CustomException(Exception):
 
 class APICallPreparer:
     """Prepares API call parameters based on configuration and user input."""
-    def __init__(self, config, prompt):
+    def __init__(self, config, prompt, cut_attempt=0):
         self.config = config
         self.prompt = prompt
+        self.cut_attempt = cut_attempt
 
     def prepare_parameters(self):
         messages = [
@@ -96,15 +99,41 @@ class APICallPreparer:
 
         # Check and log total tokens
         Logger.debug(f"Total tokens in prepared messages: {total_tokens}")
-        
-        if total_tokens > self.config['parameters']['max_tokens']:
-            Logger.error("Token limit exceeded in message preparation. Consider splitting the prompt or reducing content.")
-            raise CustomException("Token limit exceeded.")
+
+        if total_tokens > MAX_INPUT_TOKENS:
+            if self.cut_attempt >= CUTS:
+                Logger.error("Maximum number of cuts reached. Aborting.")
+                raise CustomException("Input too large, and maximum cuts exceeded.")
+            Logger.debug(f"Input token limit exceeded: {total_tokens} tokens. Attempting to cut input into smaller parts.")
+
+            # Cut the input in half with a 5% overlap
+            midpoint = len(self.prompt) // 2
+            overlap = int(len(self.prompt) * 0.05)
+            start_cut = max(midpoint - overlap, 0)
+            end_cut = min(midpoint + overlap, len(self.prompt))
+
+            # Two halves of the input with overlap
+            first_half = self.prompt[:end_cut]
+            second_half = self.prompt[start_cut:]
+
+            # Prepare parameters for each half
+            Logger.debug(f"First cut: '{first_half[:50]}...'")
+            Logger.debug(f"Second cut: '{second_half[:50]}...'")
+
+            first_half_preparer = APICallPreparer(self.config, first_half, self.cut_attempt + 1)
+            second_half_preparer = APICallPreparer(self.config, second_half, self.cut_attempt + 1)
+
+            first_parameters = first_half_preparer.prepare_parameters()
+            second_parameters = second_half_preparer.prepare_parameters()
+
+            # Merge or handle these separately as per your application logic
+            # For now, we'll just assume the first one is used
+            return first_parameters  # You may want to handle merging results
 
         parameters = {
             "model": self.config['model'],
             "messages": messages,
-            "max_tokens": self.config['parameters']['max_tokens'],
+            "max_tokens": self.config['parameters']['max_tokens'],  # For output token limit
             "temperature": self.config['parameters']['temperature'],
             "top_p": self.config['parameters']['top_p'],
             "n": self.config['parameters']['n'],
@@ -155,22 +184,7 @@ def gptapi(profile, prompt):
         api_preparer = APICallPreparer(config, prompt)
         parameters = api_preparer.prepare_parameters()
 
-        # Token-based batching logic
-        encoding = tiktoken.encoding_for_model(config['model'])
-        total_tokens = sum([len(encoding.encode(m['content'])) for m in parameters["messages"]])
-        Logger.debug(f"Total tokens before API call: {total_tokens}")
-
-        if total_tokens > config['parameters']['max_tokens']:
-            Logger.error("Token limit exceeded, splitting the request into smaller batches.")
-            # Implement logic to split `parameters["messages"]` into smaller batches
-            # For simplicity, pseudo-code:
-            # batches = split_into_batches(parameters["messages"], config['parameters']['max_tokens'])
-            # for batch in batches:
-            #     completion = openai_client.create_completion(batch)
-            #     # Aggregate results from all batches as necessary
-        else:
-            completion = openai_client.create_completion(parameters)
-
+        completion = openai_client.create_completion(parameters)
         result = completion.choices[0].message.function_call.arguments if config.get('structured_output', {}).get('enable') else completion.choices[0].message.content
 
         if not result:
