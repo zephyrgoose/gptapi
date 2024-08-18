@@ -25,7 +25,7 @@ system_prompt: |
 
 parameters:
   max_tokens: 4000
-  temperature: 0.95
+  temperature: 0.9
   top_p: 0.8
   n: 1
   stop: None
@@ -34,46 +34,13 @@ parameters:
 
 structured_output:
   name: ThreatIntelligenceScraperSchema
-  enable: true
   strict: true
   schema:
     type: object
     properties:
-      mode:
-        type: string
-        description: "Determines if the scraper is in 'link aggregation' or 'data scraping' mode."
-        enum:
-          - link_aggregation
-          - data_scraping
-      linkAggregation:
+      contentData:
         type: object
-        description: "Details of the 'link aggregation' mode."
-        properties:
-          links:
-            type: array
-            description: "Each item represents only an important, relevant link found during aggregation, including the URL, a brief description of the threat intelligence content, and the source."
-            items:
-              type: object
-              properties:
-                url:
-                  type: string
-                  format: uri
-                  description: "The URL of the important, relevant link found."
-                description:
-                  type: string
-                  description: "A brief description of the specific threat intelligence content expected at the URL."
-                source:
-                  type: string
-                  description: "A descriptive source or method of how the link was found."
-              required:
-                - url
-                - description
-                - source
-        required:
-          - links
-      dataScraping:
-        type: object
-        description: "Details of the 'data scraping' mode."
+        description: "Details of the threat intelligence content on the page."
         properties:
           title:
             type: string
@@ -83,45 +50,70 @@ structured_output:
             description: "The main content succinctly extracted from the page, focused on threat intelligence."
           summary:
             type: string
-            description: "A technically and factually dense, succinct, lossless summary of the main content extracted from the page, with a focus on threat intelligence."
+            description: "A technically dense, accurate summary of the main content extracted from the page."
           important:
             type: boolean
-            description: "Indicates if the content is of the highest significance importance or relevance - if we as a competent security team with safeguards in place act RIGHT NOW."
+            description: "Indicates if the content is of the highest significance or relevance."
           threatBreakdown:
             type: array
-            description: "An exhaustive breakdown of specific threats, exploits, or concerns mentioned in the content - don't leave "
+            description: "An exhaustive breakdown of specific threats, exploits, or concerns mentioned in the content."
             items:
               type: object
-              description: "Each item in the array represents a specific threat or exploit, including details on its type, specificity, and severity."
               properties:
                 threatType:
                   type: string
                   description: "A summary of the type of threat."
                 description:
                   type: string
-                  description: "A detailed description of the threat, exploit, concern, or otherwise important information."
+                  description: "A detailed description of the threat or important information."
                 scope:
                   type: string
-                  description: "Succinct, technical description to be able to determine if we are exposed - how do we tell?"
+                  description: "Technical description to ascertain exposure."
               required:
-              - threatType
-              - description
-              - scope
+                - threatType
+                - description
+                - scope
+              additionalProperties: false
           source:
             type: string
-            description: "The source or context of where the content was extracted from on the page."
+            description: "Source or context of where the content was extracted from on the page."
           date:
             type: string
-            format: date-time
             description: "The date and time when the content was scraped or published."
         required:
           - title
           - content
           - summary
           - important
+          - threatBreakdown
+          - source
           - date
+        additionalProperties: false
+      optionalLinks:
+        type: array
+        description: "Details of important, relevant URLs found on the page, if any."
+        items:
+          type: object
+          properties:
+            url:
+              type: string
+              description: "The URL of the important, relevant link found."
+            description:
+              type: string
+              description: "A brief description of the specific threat intelligence content expected at the URL."
+            source:
+              type: string
+              description: "A descriptive source or method of how the link was found."
+          required:
+            - url
+            - description
+            - source
+          additionalProperties: false
     required:
-      - mode
+      - contentData
+      - optionalLinks
+    additionalProperties: false
+
 
 logging:
   enable: true
