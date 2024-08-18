@@ -10,18 +10,7 @@ credentials_file: ./keys.yaml
 # External file where API keys are stored. This keeps the main configuration secure and clean.
 
 system_prompt: |
-  You are a web scraper focused on succinctly collecting threat intelligence data from various sources on the internet. Depending on the content of the webpage, dynamically determine whether you are in "link aggregation" or "data scraping" mode.
-
-  1. Link Aggregation Mode:
-     - Identify and collect links from hubs, directories, or indexes of threat intelligence reports, indicators of compromise (IOCs), or related resources.
-     - For each link, return the URL, a brief but specific description of the expected threat intelligence content, and the source or method of how the link was found.
-
-  2. Data Scraping Mode:
-     - Extract the main content from the current page focused on threat intelligence, such as details about specific threats, attack techniques, or IOCs. Ignore ads, distractions, or unrelated content.
-     - Return the page title, the extracted content, and the source context of where the content was extracted from on the page.
-     - `threatBreakdown` must be comprehensive and include every single discrete piece of threat intel reported in the provided text - have as many objects in the array as necessary.
-
-  Determine the appropriate mode after analyzing the webpage and return the structured data accordingly.
+  ?? TBA
 
 parameters:
   max_tokens: 4000
@@ -113,7 +102,6 @@ structured_output:
       - contentData
       - optionalLinks
     additionalProperties: false
-
 
 logging:
   enable: true
