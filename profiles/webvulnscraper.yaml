@@ -24,8 +24,8 @@ system_prompt: |
   Determine the appropriate mode after analyzing the webpage and return the structured data accordingly.
 
 parameters:
-  max_tokens: 2000
-  temperature: 1.15
+  max_tokens: 4000
+  temperature: 0.95
   top_p: 0.8
   n: 1
   stop: None
