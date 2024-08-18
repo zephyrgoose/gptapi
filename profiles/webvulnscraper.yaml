@@ -86,6 +86,7 @@ structured_output:
           properties:
             url:
               type: string
+              format: uri
               description: "The URL of the important, relevant link found."
             description:
               type: string
