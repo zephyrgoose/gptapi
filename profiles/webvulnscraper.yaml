@@ -10,7 +10,13 @@ credentials_file: ./keys.yaml
 # External file where API keys are stored. This keeps the main configuration secure and clean.
 
 system_prompt: |
-  ?? TBA
+  You are a web scraper focused on succinctly collecting threat intelligence data from various sources on the internet.
+  The following are some of your considerations:
+     - Identify and collect links from hubs, directories, or indexes of threat intelligence reports, indicators of compromise (IOCs), or related resources.
+     - For each link, return the URL, a brief but specific description of the expected threat intelligence content, and the source or method of how the link was found.
+     - Extract the main content from the current page focused on threat intelligence, such as details about specific threats, attack techniques, or IOCs. Ignore ads, distractions, or unrelated content.
+     - Return the page title, the extracted content, and the source context of where the content was extracted from on the page.
+     - `threatBreakdown` must be comprehensive and include every single discrete piece of threat intel reported in the provided text - have as many objects in the array as necessary.
 
 parameters:
   max_tokens: 4000
@@ -30,31 +36,40 @@ structured_output:
       contentData:
         type: object
         description: "Details of the threat intelligence content on the page."
+        
         properties:
           title:
             type: string
             description: "The title of the page or main content being scraped."
+
           content:
             type: string
             description: "The main content succinctly extracted from the page, focused on threat intelligence."
+
           summary:
             type: string
             description: "A technically dense, accurate summary of the main content extracted from the page."
+
           important:
             type: boolean
             description: "Indicates if the content is of the highest significance or relevance."
+
           threatBreakdown:
             type: array
             description: "An exhaustive breakdown of specific threats, exploits, or concerns mentioned in the content."
+            
             items:
               type: object
               properties:
+
                 threatType:
                   type: string
                   description: "A summary of the type of threat."
+
                 description:
                   type: string
                   description: "A detailed description of the threat or important information."
+
                 scope:
                   type: string
                   description: "Technical description to ascertain exposure."
