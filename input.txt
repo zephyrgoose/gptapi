@@ -1,89 +1,39 @@
-Cybersecurity Alerts & Advisories
+Royal Ransomware Actors Rebrand as “BlackSuit,” FBI and CISA Release Update to Advisory
 
-View Cybersecurity Advisories OnlyView Advisory Definitions
-[View Cybersecurity Advisories Only](https://www.cisa.gov/news-events/cybersecurity-advisories?f%5B0%5D=advisory_type%3A94)
-[View Advisory Definitions](https://www.cisa.gov/news-events/cybersecurity-advisories?page=2#definitions)
+Today, CISA—in partnership with the Federal Bureau of Investigation (FBI)—released an update to joint Cybersecurity Advisory #StopRansomware: Royal Ransomware,#StopRansomware: BlackSuit (Royal) Ransomware. The updated advisory provides network defenders with recent and historically observed tactics, techniques, and procedures (TTPs) and indicators of compromise (IOCs) associated with BlackSuit and legacy Royal activity. FBI investigations identified these TTPs and IOCs as recently as July 2024.
+[#StopRansomware: BlackSuit (Royal) Ransomware](https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-061a)
+BlackSuit ransomware attacks have spread across numerouscritical infrastructure sectorsincluding, but not limited to, commercial facilities, healthcare and public health, government facilities, and critical manufacturing.
+[critical infrastructure sectors](https://www.cisa.gov/topics/critical-infrastructure-security-and-resilience/critical-infrastructure-sectors)
+CISA encourages network defenders to review the updated advisory and apply the recommended mitigations. See#StopRansomwarefor additional guidance on ransomware protection, detection, and response. Visit CISA’sCross-Sector Cybersecurity Performance Goalsfor more information on the CPGs, including additional recommended baseline protections.
+[#StopRansomware](https://www.cisa.gov/stopransomware)
+[Cross-Sector Cybersecurity Performance Goals](https://www.cisa.gov/cross-sector-cybersecurity-performance-goals)
+CISA encourages software manufacturers to take ownership of improving the security outcomes of their customers by applying secure by design tactics. For more information on secure by design, see CISA’sSecure by Designwebpage and joint guideShifting the Balance of Cybersecurity Risk: Principles and Approaches for Secure by Design Software.
+[Secure by Design](https://www.cisa.gov/securebydesign)
+[Shifting the Balance of Cybersecurity Risk: Principles and Approaches for Secure by Design Software](https://www.cisa.gov/resources-tools/resources/secure-by-design)
+This product is provided subject to thisNotificationand thisPrivacy & Usepolicy.
+[Notification](https://www.cisa.gov/notification)
+[Privacy & Use](https://www.cisa.gov/privacy-policy)
 
-Rockwell Automation Micro850/870
+Please share your thoughts
 
-[Rockwell Automation Micro850/870](https://www.cisa.gov/news-events/ics-advisories/icsa-24-226-07)
+We recently updated our anonymousproduct survey; we’d welcome your feedback.
+[product survey](https://www.surveymonkey.com/r/CISA-cyber-survey?product=https://www.cisa.gov/news-events/alerts/2024/08/07/royal-ransomware-actors-rebrand-blacksuit-fbi-and-cisa-release-update-advisory)
 
-Rockwell Automation FactoryTalk View Site Edition
+Related Advisories
 
-[Rockwell Automation FactoryTalk View Site Edition](https://www.cisa.gov/news-events/ics-advisories/icsa-24-226-06)
 
-Rockwell Automation DataMosaix Private Cloud
+CISA Adds One Known Exploited Vulnerability to Catalog
 
-[Rockwell Automation DataMosaix Private Cloud](https://www.cisa.gov/news-events/ics-advisories/icsa-24-226-05)
+[CISA Adds One Known Exploited Vulnerability to Catalog](https://www.cisa.gov/news-events/alerts/2024/08/19/cisa-adds-one-known-exploited-vulnerability-catalog)
 
-Rockwell Automation Pavilion8
+CISA Adds One Known Exploited Vulnerability to Catalog
 
-[Rockwell Automation Pavilion8](https://www.cisa.gov/news-events/ics-advisories/icsa-24-226-04)
+[CISA Adds One Known Exploited Vulnerability to Catalog](https://www.cisa.gov/news-events/alerts/2024/08/15/cisa-adds-one-known-exploited-vulnerability-catalog)
 
-Rockwell Automation GuardLogix/ControlLogix 5580 Controller
+CISA Releases Eleven Industrial Control Systems Advisories
 
-[Rockwell Automation GuardLogix/ControlLogix 5580 Controller](https://www.cisa.gov/news-events/ics-advisories/icsa-24-226-03)
+[CISA Releases Eleven Industrial Control Systems Advisories](https://www.cisa.gov/news-events/alerts/2024/08/15/cisa-releases-eleven-industrial-control-systems-advisories)
 
-Rockwell Automation AADvance Standalone OPC-DA Server
+Adobe Releases Security Updates for Multiple Products
 
-[Rockwell Automation AADvance Standalone OPC-DA Server](https://www.cisa.gov/news-events/ics-advisories/icsa-24-226-02)
-
-AVEVA SuiteLink Server
-
-[AVEVA SuiteLink Server](https://www.cisa.gov/news-events/ics-advisories/icsa-24-226-01)
-
-CISA Adds Six Known Exploited Vulnerabilities to Catalog
-
-[CISA Adds Six Known Exploited Vulnerabilities to Catalog](https://www.cisa.gov/news-events/alerts/2024/08/13/cisa-adds-six-known-exploited-vulnerabilities-catalog)
-
-Best Practices for Cisco Device Configuration
-
-[Best Practices for Cisco Device Configuration](https://www.cisa.gov/news-events/alerts/2024/08/08/best-practices-cisco-device-configuration)
-
-CISA Releases One Industrial Control Systems Advisory
-
-[CISA Releases One Industrial Control Systems Advisory](https://www.cisa.gov/news-events/alerts/2024/08/08/cisa-releases-one-industrial-control-systems-advisory)
- - Go to first pageFirst
- - Go to previous pagePrevious
- - Page1
- - Page2
- - Currently on page3
- - Page4
- - Page5
- - Page6
- - Page7
- - Page8
- - Page9
- - …
- - Go to next pageNext
- - Go to last pageLast
-Go to first pageFirst
-[Go to first pageFirst](https://www.cisa.gov/news-events/cybersecurity-advisories?page=0)
-Go to previous pagePrevious
-[Go to previous pagePrevious](https://www.cisa.gov/news-events/cybersecurity-advisories?page=1)
-Page1
-[Page1](https://www.cisa.gov/news-events/cybersecurity-advisories?page=0)
-Page2
-[Page2](https://www.cisa.gov/news-events/cybersecurity-advisories?page=1)
-Currently on page3
-Page4
-[Page4](https://www.cisa.gov/news-events/cybersecurity-advisories?page=3)
-Page5
-[Page5](https://www.cisa.gov/news-events/cybersecurity-advisories?page=4)
-Page6
-[Page6](https://www.cisa.gov/news-events/cybersecurity-advisories?page=5)
-Page7
-[Page7](https://www.cisa.gov/news-events/cybersecurity-advisories?page=6)
-Page8
-[Page8](https://www.cisa.gov/news-events/cybersecurity-advisories?page=7)
-Page9
-[Page9](https://www.cisa.gov/news-events/cybersecurity-advisories?page=8)
-…
-Go to next pageNext
-[Go to next pageNext](https://www.cisa.gov/news-events/cybersecurity-advisories?page=3)
-Go to last pageLast
-[Go to last pageLast](https://www.cisa.gov/news-events/cybersecurity-advisories?page=756)
-
-Advisory Definitions
-
-Cybersecurity Advisory:In-depth reports covering a specific cybersecurity issue, often including threat actor tactics, techniques, and procedures; indicators of compromise; and mitigations.Alert:Concise summaries covering cybersecurity topics, such as mitigations that vendors have published for vulnerabilities in their products.ICS Advisory:Concise summaries covering industrial control system (ICS) cybersecurity topics, primarily focused on mitigations that ICS vendors have published for vulnerabilities in their products.ICS Medical Advisory:Concise summaries covering ICS medical cybersecurity topics, primarily focused on mitigations that ICS medical vendors have published for vulnerabilities in their products.Analysis Report:In-depth analysis of a new or evolving cyber threat, including technical details and remediations.
+[Adobe Releases Security Updates for Multiple Products](https://www.cisa.gov/news-events/alerts/2024/08/14/adobe-releases-security-updates-multiple-products)

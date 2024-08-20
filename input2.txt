@@ -1,0 +1,136 @@
+Rockwell Automation Pavilion8
+
+[Industrial Control System Vulnerabilities](https://www.cisa.gov/topics/industrial-control-systems/industrial-control-system-vulnerabilities)
+[Industrial Control Systems](https://www.cisa.gov/topics/industrial-control-systems)
+View CSAF
+[View CSAF](https://github.com/cisagov/CSAF)
+
+1. EXECUTIVE SUMMARY
+
+ - CVSS v4 5.3
+ - ATTENTION: Exploitable remotely/low attack complexity
+ - Vendor: Rockwell Automation
+ - Equipment: Pavilion8
+ - Vulnerability: Missing Encryption of Sensitive Data
+CVSS v4 5.3
+ATTENTION: Exploitable remotely/low attack complexity
+Vendor: Rockwell Automation
+Equipment: Pavilion8
+Vulnerability: Missing Encryption of Sensitive Data
+
+2. RISK EVALUATION
+
+Successful exploitation of this vulnerability could allow an attacker to view sensitive data due to a lack of encryption.
+
+3. TECHNICAL DETAILS
+
+
+3.1 AFFECTED PRODUCTS
+
+The following versions Rockwell Automation Pavilion8, a model predictive control software, are affected:
+ - Pavilion8: Versions v5.20 and later
+Pavilion8: Versions v5.20 and later
+
+3.2 Vulnerability Overview
+
+
+3.2.1MISSING ENCRYPTION OF SENSITIVE DATA CWE-311
+
+[MISSING ENCRYPTION OF SENSITIVE DATA CWE-311](https://cwe.mitre.org/data/definitions/311.html)
+A vulnerability exists in the affected product due to lack of encryption of sensitive information. The vulnerability results in data being sent between the Console and the Dashboard without encryption, which can be seen in the logs of proxy servers, potentially impacting the data's confidentiality.
+CVE-2024-40620has been assigned to this vulnerability. A CVSS v3.1 base score of 7.4 has been calculated; the CVSS vector string is (AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:L).
+[CVE-2024-40620](http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2024-40620)
+[AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:L](https://www.first.org/cvss/calculator/3.1#CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:L)
+A CVSS v4 score has also been calculated forCVE-2024-40620. A base score of 5.3 has been calculated; the CVSS vector string is (CVSS4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N).
+[CVE-2024-40620](http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2024-40620)
+[CVSS4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N](https://www.first.org/cvss/calculator/4.0#CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N)
+
+3.3 BACKGROUND
+
+ - CRITICAL INFRASTRUCTURE SECTORS:Critical Manufacturing
+ - COUNTRIES/AREAS DEPLOYED:Worldwide
+ - COMPANY HEADQUARTERS LOCATION:United States
+CRITICAL INFRASTRUCTURE SECTORS:Critical Manufacturing
+COUNTRIES/AREAS DEPLOYED:Worldwide
+COMPANY HEADQUARTERS LOCATION:United States
+
+3.4 RESEARCHER
+
+Rockwell Automation reported this vulnerability to CISA.
+
+4. MITIGATIONS
+
+Rockwell Automation has released product updates addressing this vulnerability:
+ - Pavilion8: update to v6.0 or later
+Pavilion8: update to v6.0 or later
+Users of the affected software, who are not able to upgrade to one of the corrected versions, are encouraged to apply security best practices, where possible.
+ - Interactions between the Console and Dashboard take place on the same machine, the machine should exist behind a firewall and physical access should be limited to authorized personnel.
+ - Security Best Practices
+Interactions between the Console and Dashboard take place on the same machine, the machine should exist behind a firewall and physical access should be limited to authorized personnel.
+Security Best Practices
+[Security Best Practices](https://rockwellautomation.custhelp.com/app/answers/answer_view/a_id/1085012/loc/en_US#__highlight)
+Users can useStakeholder-Specific Vulnerability Categorizationto generate more environment-specific prioritization.
+[Stakeholder-Specific Vulnerability Categorization](https://www.cisa.gov/stakeholder-specific-vulnerability-categorization-ssvc)
+CISA recommends users take defensive measures to minimize the risk of exploitation of this vulnerability, such as:
+ - Minimize network exposure for all control system devices and/or systems, ensuring they arenot accessible from the internet.
+ - Locate control system networks and remote devices behind firewalls and isolating them from business networks.
+ - When remote access is required, use more secure methods, such as Virtual Private Networks (VPNs), recognizing VPNs may have vulnerabilities and should be updated to the most current version available. Also recognize VPN is only as secure as the connected devices.
+Minimize network exposure for all control system devices and/or systems, ensuring they arenot accessible from the internet.
+[not accessible from the internet](https://www.cisa.gov/uscert/ics/alerts/ICS-ALERT-10-301-01)
+Locate control system networks and remote devices behind firewalls and isolating them from business networks.
+When remote access is required, use more secure methods, such as Virtual Private Networks (VPNs), recognizing VPNs may have vulnerabilities and should be updated to the most current version available. Also recognize VPN is only as secure as the connected devices.
+CISA reminds organizations to perform proper impact analysis and risk assessment prior to deploying defensive measures.
+CISA also provides a section forcontrol systems security recommended practiceson the ICS webpage oncisa.gov/ics. Several CISA products detailing cyber defense best practices are available for reading and download, includingImproving Industrial Control Systems Cybersecurity with Defense-in-Depth Strategies.
+[control systems security recommended practices](https://www.cisa.gov/resources-tools/resources/ics-recommended-practices)
+[cisa.gov/ics](https://www.cisa.gov/topics/industrial-control-systems)
+[Improving Industrial Control Systems Cybersecurity with Defense-in-Depth Strategies](https://us-cert.cisa.gov/sites/default/files/recommended_practices/NCCIC_ICS-CERT_Defense_in_Depth_2016_S508C.pdf)
+CISA encourages organizations to implement recommended cybersecurity strategies forproactive defense of ICS assets.
+[proactive defense of ICS assets](https://www.cisa.gov/sites/default/files/publications/Cybersecurity_Best_Practices_for_Industrial_Control_Systems.pdf)
+Additional mitigation guidance and recommended practices are publicly available on the ICS webpage atcisa.gov/icsin the technical information paper,ICS-TIP-12-146-01B--Targeted Cyber Intrusion Detection and Mitigation Strategies.
+[cisa.gov/ics](https://www.cisa.gov/topics/industrial-control-systems)
+[ICS-TIP-12-146-01B--Targeted Cyber Intrusion Detection and Mitigation Strategies](https://www.cisa.gov/uscert/ics/tips/ICS-TIP-12-146-01B)
+Organizations observing suspected malicious activity should follow established internal procedures and report findings to CISA for tracking and correlation against other incidents.
+No known public exploitation specifically targeting this vulnerability has been reported to CISA at this time.
+
+5. UPDATE HISTORY
+
+ - August 13, 2024: Initial Publication
+August 13, 2024: Initial Publication
+This product is provided subject to thisNotificationand thisPrivacy & Usepolicy.
+[Notification](https://www.cisa.gov/notification)
+[Privacy & Use](https://www.cisa.gov/privacy-policy)
+
+Vendor
+
+ - Rockwell Automation
+Rockwell Automation
+
+Tags
+
+[Industrial Control System Vulnerabilities](https://www.cisa.gov/topics/industrial-control-systems/industrial-control-system-vulnerabilities)
+[Industrial Control Systems](https://www.cisa.gov/topics/industrial-control-systems)
+[Critical Manufacturing Sector](https://www.cisa.gov/topics/critical-infrastructure-security-and-resilience/critical-infrastructure-sectors/critical-manufacturing-sector)
+
+Please share your thoughts
+
+We recently updated our anonymousproduct survey; we’d welcome your feedback.
+[product survey](https://www.surveymonkey.com/r/CISA-cyber-survey?product=https://www.cisa.gov/news-events/ics-advisories/icsa-24-226-04)
+
+Related Advisories
+
+
+Siemens INTRALOG WMS
+
+[Siemens INTRALOG WMS](https://www.cisa.gov/news-events/ics-advisories/icsa-24-228-02)
+
+Siemens LOGO! V8.3 BM Devices
+
+[Siemens LOGO! V8.3 BM Devices](https://www.cisa.gov/news-events/ics-advisories/icsa-24-228-05)
+
+Siemens COMOS
+
+[Siemens COMOS](https://www.cisa.gov/news-events/ics-advisories/icsa-24-228-08)
+
+PTC Kepware ThingWorx Kepware Server
+
+[PTC Kepware ThingWorx Kepware Server](https://www.cisa.gov/news-events/ics-advisories/icsa-24-228-11)
