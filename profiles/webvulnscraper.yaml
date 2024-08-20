@@ -10,18 +10,14 @@ credentials_file: ./keys.yaml
 # External file where API keys are stored. This keeps the main configuration secure and clean.
 
 system_prompt: |
-  You are a web scraper focused on succinctly collecting threat intelligence data from various sources on the internet.
-  The following are some of your considerations:
-     - Identify and collect links from hubs, directories, or indexes of threat intelligence reports, indicators of compromise (IOCs), or related resources.
-     - For each link, return the URL, a brief but specific description of the expected threat intelligence content, and the source or method of how the link was found.
-     - Extract the main content from the current page focused on threat intelligence, such as details about specific threats, attack techniques, or IOCs. Ignore ads, distractions, or unrelated content.
-     - Return the page title, the extracted content, and the source context of where the content was extracted from on the page.
-     - `threatBreakdown` must be comprehensive and include every single discrete piece of threat intel reported in the provided text - have as many objects in the array as necessary.
+  You are a web scraper specialized in succinctly collecting relevant threat intelligence data and only the most critical and relevant links from various sources on the internet.
+  Focus on extracting and analyzing links or data that represents the highest importance and urgency in current threat landscapes, ensuring outputs are concise and directly applicable to critical decision-making.
+  Immediately disregard links that are generic, non-specific, irrelevant, etc. Only include links that are directly of the utmost important, are directly related, and that will have more specifically useful data. 
 
 parameters:
   max_tokens: 4000
-  temperature: 0.9
-  top_p: 0.8
+  temperature: 0.95
+  top_p: 0.9
   n: 1
   stop: None
   frequency_penalty: 0.0  # Controls how much the model penalises new tokens based on their existing frequency in the text so far.
@@ -29,101 +25,111 @@ parameters:
 
 structured_output:
   name: ThreatIntelligenceScraperSchema
+  enable: true
   strict: true
   schema:
     type: object
+    description: "The root object containing all extracted threat intelligence data and links."
     properties:
-      contentData:
-        type: object
-        description: "Details of the threat intelligence content on the page."
-        
-        properties:
-          title:
-            type: string
-            description: "The title of the page or main content being scraped."
-
-          content:
-            type: string
-            description: "The main content succinctly extracted from the page, focused on threat intelligence."
-
-          summary:
-            type: string
-            description: "A technically dense, accurate summary of the main content extracted from the page."
-
-          important:
-            type: boolean
-            description: "Indicates if the content is of the highest significance or relevance."
-
-          threatBreakdown:
-            type: array
-            description: "An exhaustive breakdown of specific threats, exploits, or concerns mentioned in the content."
-            
-            items:
-              type: object
-              properties:
-
-                threatType:
-                  type: string
-                  description: "A summary of the type of threat."
-
-                description:
-                  type: string
-                  description: "A detailed description of the threat or important information."
-
-                scope:
-                  type: string
-                  description: "Technical description to ascertain exposure."
-              required:
-                - threatType
-                - description
-                - scope
-              additionalProperties: false
-          source:
-            type: string
-            description: "Source or context of where the content was extracted from on the page."
-          date:
-            type: string
-            description: "The date and time when the content was scraped or published."
-        required:
-          - title
-          - content
-          - summary
-          - important
-          - threatBreakdown
-          - source
-          - date
-        additionalProperties: false
-      optionalLinks:
+      links:
         type: array
-        description: "Details of important, relevant URLs found on the page, if any."
+        description: "An array of important links found, each with a URL, relevance score, description, and source."
         items:
           type: object
+          description: "An object representing a single link with its URL, relevance score, description, and discovery source."
           properties:
             url:
               type: string
               format: uri
-              description: "The URL of the important, relevant link found."
+              description: "The URL of the important link found."
+            relevance_score:
+              type: number
+              description: "A score of 1 - 10 representing the relevance or importance of the link. Higher scores indicate higher relevance."
             description:
               type: string
-              description: "A brief description of the specific threat intelligence content expected at the URL."
+              description: "A succinct description of the specific threat intelligence this link should contain."
             source:
               type: string
               description: "A descriptive source or method of how the link was found."
           required:
             - url
+            - relevance_score
             - description
             - source
           additionalProperties: false
+      data:
+        type: array
+        description: "An array containing threat intelligence data objects extracted from the page."
+        items:
+          type: object
+          description: "An object detailing specific intelligence data including title, content, and threats."
+          properties:
+            title:
+              type: string
+              description: "The title of the page or main content."
+            content:
+              type: string
+              description: "The extracted main content focused on threat intelligence."
+            summary:
+              type: string
+              description: "A lossless, dense summary of the main content, with a focus on threat intelligence."
+            important:
+              type: boolean
+              description: "Indicates if the content has the highest relevance or urgency."
+            threatBreakdown:
+              type: array
+              description: "An exhaustive breakdown of specific threats, exploits, or concerns mentioned in the content"
+              items:
+                type: object
+                description: "Each item in the array represents a specific threat or exploit, including details on its type, specificity, severity, and scope."
+                properties:
+                  threatType:
+                    type: string
+                    description: "Summary of the type of threat."
+                  description:
+                    type: string
+                    description: "A detailed description of the threat, exploit, concern, or otherwise important information."
+                  identifiers:
+                    type: string
+                    description: "Specific identifiers for this threat, such as a CVE."
+                  severity:
+                    type: string
+                    description: "The severity of the threat - CVSS v4 if possible."
+                  scope:
+                    type: string
+                    description: "Succinct, technical description to be able to determine decisively if we are exposed (vulnerable versions/release dates, IoCs, etc) - how do we tell?"
+                  source:
+                    type: string
+                    description: "The source or context from where the content was extracted."
+                  date:
+                    type: string
+                    format: date-time
+                    description: "The date and time when the content was scraped or published."
+                required:
+                  - threatType
+                  - description
+                  - identifiers
+                  - severity
+                  - scope
+                  - source
+                  - date
+                additionalProperties: false
+          required:
+            - title
+            - content
+            - summary
+            - important
+            - threatBreakdown
+            - date
+          additionalProperties: false
     required:
-      - contentData
-      - optionalLinks
+      - links
+      - data
     additionalProperties: false
 
 logging:
   enable: true
   log_level: INFO
   log_file: ./logs/api_calls.log
-# Logging configuration for debugging and auditing purposes. Helps in tracking and troubleshooting issues.
 
 timeout: 10
-# Timeout setting for the API call, ensuring the program doesn’t hang indefinitely.
