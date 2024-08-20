@@ -1,6 +1,7 @@
 import json
 import yaml
 import openai
+from openai import BadRequestError
 import logging
 import tiktoken
 from pathlib import Path
@@ -99,7 +100,9 @@ class APICallPreparer:
 
         # Check and log total tokens
         Logger.debug(f"Total tokens in prepared messages: {total_tokens}")
+        
 
+        # This is a little fucked, would like to get rid of this later
         if total_tokens > MAX_INPUT_TOKENS:
             if self.cut_attempt >= CUTS:
                 Logger.error("Maximum number of cuts reached. Aborting.")
@@ -202,13 +205,13 @@ def gptapi(profile, prompt):
         Logger.error(str(e))
         raise SystemExit(str(e))
 
-    except openai.error.InvalidRequestError as e:
+    except BadRequestError as e:
         if "context_length_exceeded" in str(e):
             Logger.error("API request failed due to exceeding the token context length.")
             raise SystemExit("Token context length exceeded. Please adjust the input.")
         else:
             Logger.error(f"Unexpected API error: {e}")
-            raise SystemExit("Unexpected API error. Please try again later.")
+            raise SystemExit(f"Unexpected API error: {e}")
 
     except Exception as e:
         Logger.error(f"An unexpected error occurred: {e}")

@@ -16,92 +16,108 @@ system_prompt: |
   Be clear, concise, and short, but include all relevant details. 
 
 parameters:
-  max_tokens: 8000
+  max_tokens: 4000
   temperature: 0.95
   top_p: 0.9
   n: 1
   stop: None
-  frequency_penalty: 0.0  # Controls how much the model penalises new tokens based on their existing frequency in the text so far.
-  presence_penalty: 0.03 # Controls how much the model penalises new tokens based on whether they appear in the text so far.
+  frequency_penalty: 0.1  # Controls how much the model penalises new tokens based on their existing frequency in the text so far.
+  presence_penalty: 0.2 # Controls how much the model penalises new tokens based on whether they appear in the text so far.
 
 structured_output:
   name: ThreatIntelligenceScraperSchema
-  enable: true
   strict: true
+  enable: true
   schema:
+
     type: object
-    description: "The root object containing all extracted threat intelligence data and links."
+    description: The root object containing all extracted threat intelligence data.
     properties:
+
       links:
         type: array
-        description: "An array of important links found, each with a URL, relevance score, description, and source."
+        description: An array of important links found, each with a URL, relevance score, description, and source.
         items:
           type: object
-          description: "An object representing a single link with its URL, relevance score, description, and discovery source."
+          description: An object representing a single link with its URL, relevance score, description, and discovery source.
           properties:
+
             url:
               type: string
-              format: uri
-              description: "The URL of the important link found."
+              description: The full URL of the important link found.
+
             relevance_score:
-              type: number
-              description: "A score of 1 - 10 representing the relevance or importance of the link. Higher scores indicate higher relevance."
+              type: integer
+              description: A score of 1 - 10 representing the relevance or importance of the link. Higher scores indicate higher relevance.
+              minimum: 1
+              maximum: 10
+            
             description:
               type: string
-              description: "A succinct description of the specific threat intelligence this link should contain."
+              description: A succinct description of the specific threat intelligence this link should contain.
+            
             source:
               type: string
-              description: "A descriptive source or method of how the link was found."
+              description: A descriptive source or method of how the link was found.
+
           required:
             - url
             - relevance_score
             - description
             - source
           additionalProperties: false
+
       data:
         type: array
-        description: "An array containing threat intelligence data objects extracted from the page."
+        description: An array containing threat intelligence data objects extracted from the page.
         items:
           type: object
-          description: "An object detailing specific intelligence data including title, content, and threats."
+          description: An object detailing specific intelligence data including title, content, and threats.
           properties:
+            
             title:
               type: string
-              description: "The title of the page or main content."
+              description: The title of the page or main content.
+            
             content:
               type: string
-              description: "The extracted main content focused on threat intelligence."
+              description: A succinct extraction of the main content focused on threat intelligence.
+            
             summary:
               type: string
-              description: "A lossless, dense summary of the main content, with a focus on threat intelligence."
+              description: A lossless, dense, concise summary of the main content, with a focus on threat intelligence and brevity.
+            
             important:
               type: boolean
-              description: "Indicates if the content has the highest relevance or urgency."
+              description: Indicates if the content has the highest relevance or urgency.
+            
             threatBreakdown:
               type: array
-              description: "An exhaustive breakdown of specific threats, exploits, or concerns mentioned in the content"
+              description: An exhaustive breakdown of specific threats, exploits, or concerns mentioned in the content.
+              
               items:
                 type: object
-                description: "Each item in the array represents a specific threat or exploit, including details on its type, specificity, severity, and scope."
+                description: Each item in the array represents a specific threat or exploit, including details on its type, specificity, severity, and scope.
                 properties:
+                  
                   threatType:
                     type: string
-                    description: "Summary of the type of threat."
+                    description: Summary of the type of threat.
                   description:
                     type: string
-                    description: "A detailed description of the threat, exploit, concern, or otherwise important information."
+                    description: A detailed description of the threat, exploit, concern, or otherwise important information.
                   identifiers:
                     type: string
-                    description: "Specific identifiers for this threat, such as a CVE."
+                    description: Specific identifiers for this threat, such as a CVE.
                   severity:
                     type: string
-                    description: "The severity of the threat - CVSS v4 if possible."
+                    description: The severity of the threat - CVSS v4 if possible.
                   scope:
                     type: string
-                    description: "Succinct, technical description to be able to determine decisively if we are exposed (vulnerable versions/release dates, IoCs, etc) - how do we tell?"
+                    description: Succinct, technical description to be able to determine decisively if we are exposed (vulnerable versions/release dates, IoCs, etc) - how do we tell?
                   source:
                     type: string
-                    description: "The source or context from where the content was extracted."
+                    description: The source or context from where the content was extracted.
                 required:
                   - threatType
                   - description
@@ -112,8 +128,7 @@ structured_output:
                 additionalProperties: false
             date:
               type: string
-              format: date-time
-              description: "The date and time when the content was scraped or published."
+              description: The most relevant ISO 8601 date found in the content to assign to the scraped content.
           required:
             - title
             - content
@@ -122,6 +137,7 @@ structured_output:
             - threatBreakdown
             - date
           additionalProperties: false
+
     required:
       - links
       - data
