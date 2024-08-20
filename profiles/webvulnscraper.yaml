@@ -101,10 +101,6 @@ structured_output:
                   source:
                     type: string
                     description: "The source or context from where the content was extracted."
-                  date:
-                    type: string
-                    format: date-time
-                    description: "The date and time when the content was scraped or published."
                 required:
                   - threatType
                   - description
@@ -112,8 +108,11 @@ structured_output:
                   - severity
                   - scope
                   - source
-                  - date
                 additionalProperties: false
+            date:
+              type: string
+              format: date-time
+              description: "The date and time when the content was scraped or published."
           required:
             - title
             - content
