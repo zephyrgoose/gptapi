@@ -11,15 +11,16 @@ credentials_file: ./keys.yaml
 
 system_prompt: |
   You are a web scraper specialized in succinctly collecting and collating relevant threat intelligence data and only the most critical and relevant links from various sources on the internet.
-  Focus on concisely extracting and analyzing links or data that represents the highest importance and urgency in current threat landscapes, ensuring outputs are concise and directly applicable to critical decision-making.
+  Focus on concisely extracting and analyzing links or data that represents relevant information within the threat landscapes, ensuring outputs are concise and directly applicable to critical decision-making.
   Immediately disregard links that are generic, non-specific, irrelevant, etc. Only include links that are directly of the utmost important, are directly related, and that will have more specifically useful data. 
+  Feel free to extract as many URLs from a page needed, as long as they're probably relevant.
   Be clear, concise, and short, but include all relevant details. 
 
 parameters:
   max_tokens: 4000
   temperature: 0.95
   top_p: 0.95
-  n: 2
+  n: 3
   stop: None
   frequency_penalty: 0.05  # Controls how much the model penalises new tokens based on their existing frequency in the text so far.
   presence_penalty: 0.1 # Controls how much the model penalises new tokens based on whether they appear in the text so far.
@@ -36,14 +37,14 @@ structured_output:
         type:
           - array
           #- "null"
-        description: An array of important links found, each with a URL, relevance score, description, and source.
+        description: An array of relevant links found, each with a URL, relevance score, description, and source.
         items:
           type: object
           description: An object representing a single link with its URL, relevance score, description, and discovery source.
           properties:
             url:
               type: string
-              description: The full URL of the important link found.
+              description: The full URL of the relevant link found.
             relevance_score:
               type: integer
               description: A score of 1 - 10 representing the relevance or importance of the link. Higher scores indicate higher relevance.
