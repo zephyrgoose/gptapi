@@ -1,4 +1,5 @@
 input.txt
+keys.yaml
 
 
 
@@ -79,9 +80,6 @@ coverage.xml
 
 # MySQL
 db/*.sqlite3
-
-# local credentials
-keys.yaml
 
 # Logging and debug files
 logs/
