@@ -14,7 +14,7 @@ def read_prompt_from_file(file_path):
     """
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
-            prompt = file.read().strip()
+            prompt = file.read()#.strip()
         return prompt
     except FileNotFoundError:
         logging.error("The file %s does not exist.", file_path)

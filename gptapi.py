@@ -1,5 +1,7 @@
 import yaml
 from openai import Client
+import json
+import os
 
 def load_yaml(file_path):
     """Loads and parses a YAML file."""
@@ -17,8 +19,9 @@ def validate_config(config, required_fields):
         if field not in config:
             raise ValueError(f"Missing required configuration field: {field}")
 
-def load_profile(profile_filename):
+def load_profile(profile_name, profiles_dir):
     """Loads and validates the profile from a YAML configuration file."""
+    profile_filename = os.path.join(profiles_dir, f'{profile_name}.yaml')
     profile = load_yaml(profile_filename)
     
     # Define required fields
@@ -29,32 +32,49 @@ def load_profile(profile_filename):
 
 def load_api_key(keys_filename):
     """Loads the API key from a separate YAML file."""
-    keys = load_yaml(keys_filename)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    keys_filepath = os.path.join(current_dir, keys_filename)  # Use the directory of gptapi.py
+    
+    keys = load_yaml(keys_filepath)
     
     if 'openai_api' not in keys:
         raise ValueError("Missing 'openai_api' in keys file.")
     
     return keys['openai_api']
 
-def gptapi(profile_filename, prompt):
+
+def gptapi(profile_name, prompt):
     """Main function to interact with the GPT API."""
-    profile = load_profile(profile_filename)
+    
+    # Define the directory where profile YAML files are stored
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    profiles_dir = os.path.join(current_dir, 'profiles')  # Ensure this path points to the correct profiles directory
+    
+    profile = load_profile(profile_name, profiles_dir)
     api_key = load_api_key(profile.get('credentials_file', './keys.yaml'))
     
     client = Client(api_key=api_key)  # Initialize the OpenAI client
     
-    # Prepare the response format
+    # Prepare the response format with JSON-compliant formatting
     response_format = {
         "type": "json_schema",
         "json_schema": {
             "name": profile['structured_output']['name'],
-            "schema": profile['structured_output']['schema'],
+            "schema": {
+                "type": "object",
+                "properties": profile['structured_output']['schema']['properties'],
+                "required": profile['structured_output']['schema'].get('required', []),
+                "additionalProperties": profile['structured_output']['schema'].get('additionalProperties', False)
+            },
             "strict": profile['structured_output'].get('strict', True)
         }
     }
+
+    # Convert the schema to a JSON string with double quotation marks
+    response_format_json = json.dumps(response_format, indent=4)
     
     # Print the response format before the API call
-    print(f"Response Format: {response_format}")
+    #print(f"Response Format:\n{response_format_json}")
     
     # Prepare the API request
     response = client.chat.completions.create(
@@ -63,19 +83,21 @@ def gptapi(profile_filename, prompt):
             {"role": "system", "content": profile['system_prompt']},
             {"role": "user", "content": prompt}
         ],
-        response_format=response_format,
+        response_format=json.loads(response_format_json),
         **profile['parameters']
     )
     
-    # Handle the response
-    content = response.choices[0].message.content
-    print("API Response:", content)
-    
     # Basic error handling
-    if hasattr(response, 'usage'):
-        print("Token Usage:", response.usage)
+    #if hasattr(response, 'usage'):
+    #    print("Token Usage:", response.usage)
     if hasattr(response, 'errors'):
         print("Errors:", response.errors)
+    
+    # Handle the response
+    content = response.choices[0].message.content
+    if content:
+        return content
 
 # Example usage:
-gptapi('./profiles/webvulnscraper.yaml', "Today, CISA—in partnership with the Federal Bureau of Investigation (FBI)—released an update to joint Cybersecurity Advisory #StopRansomware: Royal Ransomware,#StopRansomware: BlackSuit (Royal) Ransomware. The updated advisory provides network defenders with recent and historically observed tactics, techniques, and procedures (TTPs) and indicators of compromise (IOCs) associated with BlackSuit and legacy Royal activity. FBI investigations identified these TTPs and IOCs as recently as July 2024. [#StopRansomware: BlackSuit (Royal) Ransomware](https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-061a). BlackSuit ransomware attacks have spread across numerouscritical infrastructure sectorsincluding, but not limited to, commercial facilities, healthcare and public health, government facilities, and critical manufacturing. [critical infrastructure sectors](https://www.cisa.gov/topics/critical-infrastructure-security-and-resilience/critical-infrastructure-sectors). CISA encourages network defenders to review the updated advisory and apply the recommended mitigations. See#StopRansomwarefor additional guidance on ransomware protection, detection, and response. Visit CISA’sCross-Sector Cybersecurity Performance Goalsfor more information on the CPGs, including additional recommended baseline protections. [#StopRansomware](https://www.cisa.gov/stopransomware). [Cross-Sector Cybersecurity Performance Goals](https://www.cisa.gov/cross-sector-cybersecurity-performance-goals). CISA encourages software manufacturers to take ownership of improving the security outcomes of their customers by applying secure by design tactics. For more information on secure by design, see CISA’sSecure by Designwebpage and joint guideShifting the Balance of Cybersecurity Risk: Principles and Approaches for Secure by Design Software.")
+#result = gptapi('webvulnscraper', "Today, CISA—in partnership with the Federal Bureau of Investigation (FBI)—released an update to joint Cybersecurity Advisory #StopRansomware: Royal Ransomware, etc.")
+#print(result)

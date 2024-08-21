@@ -19,7 +19,7 @@ parameters:
   max_tokens: 4000
   temperature: 0.95
   top_p: 0.95
-  n: 1
+  n: 2
   stop: None
   frequency_penalty: 0.05  # Controls how much the model penalises new tokens based on their existing frequency in the text so far.
   presence_penalty: 0.1 # Controls how much the model penalises new tokens based on whether they appear in the text so far.
@@ -33,7 +33,9 @@ structured_output:
     description: The root object containing all extracted threat intelligence data.
     properties:
       links:
-        type: array
+        type:
+          - array
+          #- "null"
         description: An array of important links found, each with a URL, relevance score, description, and source.
         items:
           type: object
@@ -58,7 +60,9 @@ structured_output:
             - source
           additionalProperties: false
       data:
-        type: array
+        type:
+          - array
+          #- "null"
         description: An array containing threat intelligence data objects extracted from the page.
         items:
           type: object
@@ -90,7 +94,9 @@ structured_output:
                     type: string
                     description: A detailed description of the threat, exploit, concern, or otherwise important information.
                   identifiers:
-                    type: string
+                    type:
+                    - string
+                    - "null"
                     description: Specific identifiers for this threat, such as a CVE.
                   severity:
                     type: string

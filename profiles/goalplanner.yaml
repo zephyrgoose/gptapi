@@ -47,9 +47,19 @@ structured_output:
             difficulty:
               type: integer
               description: "An estimate of how hard the goal is, from 1 to 10."
-              minimum: 1
-              maximum: 10
+              enum:
+                - 1
+                - 2
+                - 3
+                - 4
+                - 5
+                - 6
+                - 7
+                - 8
+                - 9
+                - 10
           required: ["title", "category", "difficulty"]
+          additionalProperties: False
       nextSteps:
         type: array
         description: "A list of 5 distinct steps to achieve the high-level goals, each with a priority and target completion date."
@@ -62,14 +72,16 @@ structured_output:
             priority:
               type: integer
               description: "The priority level of this step, from 1 (highest) to 5 (lowest)."
-              minimum: 1
-              maximum: 5
-            targetCompletionDate:
-              type: string
-              format: date-time
-              description: "The target date and time by which this step should be completed."
-          required: ["step", "priority", "targetCompletionDate"]
+              enum:
+                - 1
+                - 2
+                - 3
+                - 4
+                - 5
+          required: ["step", "priority"]
+          additionalProperties: False
     required: ["highLevelGoals", "nextSteps"]
+    additionalProperties: False
 
 logging:
   enable: true
