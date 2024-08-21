@@ -30,7 +30,7 @@ def main():
     try:
         # Define the profile name and input file path
         profile_name = 'webvulnscraper'  # The YAML profile file name without the extension
-        input_file_path = './input2.txt'  # Path to the input file containing the prompt
+        input_file_path = './input.txt'  # Path to the input file containing the prompt
 
         # Read the prompt from the input file
         prompt = read_prompt_from_file(input_file_path)

@@ -18,22 +18,20 @@ system_prompt: |
 parameters:
   max_tokens: 4000
   temperature: 0.95
-  top_p: 0.9
+  top_p: 0.95
   n: 1
   stop: None
-  frequency_penalty: 0.1  # Controls how much the model penalises new tokens based on their existing frequency in the text so far.
-  presence_penalty: 0.2 # Controls how much the model penalises new tokens based on whether they appear in the text so far.
+  frequency_penalty: 0.05  # Controls how much the model penalises new tokens based on their existing frequency in the text so far.
+  presence_penalty: 0.1 # Controls how much the model penalises new tokens based on whether they appear in the text so far.
 
 structured_output:
   name: ThreatIntelligenceScraperSchema
   strict: true
   enable: true
   schema:
-
     type: object
     description: The root object containing all extracted threat intelligence data.
     properties:
-
       links:
         type: array
         description: An array of important links found, each with a URL, relevance score, description, and source.
@@ -41,32 +39,24 @@ structured_output:
           type: object
           description: An object representing a single link with its URL, relevance score, description, and discovery source.
           properties:
-
             url:
               type: string
               description: The full URL of the important link found.
-
             relevance_score:
               type: integer
               description: A score of 1 - 10 representing the relevance or importance of the link. Higher scores indicate higher relevance.
-              minimum: 1
-              maximum: 10
-            
             description:
               type: string
               description: A succinct description of the specific threat intelligence this link should contain.
-            
             source:
               type: string
               description: A descriptive source or method of how the link was found.
-
           required:
             - url
             - relevance_score
             - description
             - source
           additionalProperties: false
-
       data:
         type: array
         description: An array containing threat intelligence data objects extracted from the page.
@@ -74,32 +64,25 @@ structured_output:
           type: object
           description: An object detailing specific intelligence data including title, content, and threats.
           properties:
-            
             title:
               type: string
               description: The title of the page or main content.
-            
             content:
               type: string
-              description: A succinct extraction of the main content focused on threat intelligence.
-            
+              description: An extraction of the primary content focused on threat intelligence.
             summary:
               type: string
               description: A lossless, dense, concise summary of the main content, with a focus on threat intelligence and brevity.
-            
             important:
               type: boolean
               description: Indicates if the content has the highest relevance or urgency.
-            
             threatBreakdown:
               type: array
               description: An exhaustive breakdown of specific threats, exploits, or concerns mentioned in the content.
-              
               items:
                 type: object
                 description: Each item in the array represents a specific threat or exploit, including details on its type, specificity, severity, and scope.
                 properties:
-                  
                   threatType:
                     type: string
                     description: Summary of the type of threat.
@@ -137,7 +120,6 @@ structured_output:
             - threatBreakdown
             - date
           additionalProperties: false
-
     required:
       - links
       - data
