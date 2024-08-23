@@ -1,6 +1,9 @@
 ## Cloning the Repository
 
 This repository uses submodules!
+
+The profiles used to call the gptapi are stored as their own repository: https://github.com/zephyrgoose/gptapi-profiles-public
+
 To clone this repository with all its submodules, use the following command:
 
 ```bash
