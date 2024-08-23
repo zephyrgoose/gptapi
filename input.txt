@@ -3,10 +3,3 @@ Specifically, it should be designed as a practical example program, allowing enc
 This program will be used to run practical examples of these encryptions methods such that the user can gain a practical example of the process.
 This program should be modular such that different encryotion protocols, different modes of operations, etc, all are easily possible in the future.
 Do it in python using flask.
-
-
-
-
-
-
-Architect, plan, and design a program that facilitates the use of asymmetric encryption protocols (RSA, elliptic curve). Specifically, it should be designed as a practical example program, allowing encryption, decryption, key generation, etc, all while providing succinct explanations. This program will be used to run practical examples of these encryptions methods such that the user can gain a practical example of the process. This program should be modular such that different encryotion protocols, different modes of operations, etc, all are easily possible in the future. Do it in python using flask.

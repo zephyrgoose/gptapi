@@ -3,6 +3,7 @@ from openai import Client
 import json
 import os
 
+
 def load_yaml(file_path):
     """Loads and parses a YAML file."""
     try:
@@ -13,48 +14,51 @@ def load_yaml(file_path):
     except yaml.YAMLError as exc:
         raise ValueError(f"Error parsing YAML file: {file_path} - {exc}")
 
+
 def validate_config(config, required_fields):
     """Validates that all required fields are present in the config."""
     for field in required_fields:
         if field not in config:
             raise ValueError(f"Missing required configuration field: {field}")
 
+
 def load_profile(profile_name, profiles_dir):
     """Loads and validates the profile from a YAML configuration file."""
     profile_filename = os.path.join(profiles_dir, f'{profile_name}.yaml')
     profile = load_yaml(profile_filename)
-    
+
     # Define required fields
     required_fields = ['model', 'system_prompt', 'parameters', 'structured_output']
     validate_config(profile, required_fields)
-    
+
     return profile
+
 
 def load_api_key(keys_filename):
     """Loads the API key from a separate YAML file."""
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    keys_filepath = os.path.join(current_dir, keys_filename)  # Use the directory of gptapi.py
-    
+    keys_filepath = os.path.join(current_dir, keys_filename)
+
     keys = load_yaml(keys_filepath)
-    
+
     if 'openai_api' not in keys:
         raise ValueError("Missing 'openai_api' in keys file.")
-    
+
     return keys['openai_api']
 
 
 def gptapi(profile_name, prompt):
     """Main function to interact with the GPT API."""
-    
+
     # Define the directory where profile YAML files are stored
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    profiles_dir = os.path.join(current_dir, 'profiles')  # Ensure this path points to the correct profiles directory
-    
+    profiles_dir = os.path.join(current_dir, 'profiles')
+
     profile = load_profile(profile_name, profiles_dir)
     api_key = load_api_key(profile.get('credentials_file', './keys.yaml'))
-    
+
     client = Client(api_key=api_key)  # Initialize the OpenAI client
-    
+
     # Prepare the response format with JSON-compliant formatting
     response_format = {
         "type": "json_schema",
@@ -69,13 +73,9 @@ def gptapi(profile_name, prompt):
             "strict": profile['structured_output'].get('strict', True)
         }
     }
-
     # Convert the schema to a JSON string with double quotation marks
     response_format_json = json.dumps(response_format, indent=4)
-    
-    # Print the response format before the API call
-    #print(f"Response Format:\n{response_format_json}")
-    
+
     # Prepare the API request
     response = client.chat.completions.create(
         model=profile['model'],
@@ -86,17 +86,31 @@ def gptapi(profile_name, prompt):
         response_format=json.loads(response_format_json),
         **profile['parameters']
     )
-    
-    # Basic error handling
-    if hasattr(response, 'usage'):
-        print("Token Usage:", response.usage)
-    if hasattr(response, 'errors'):
-        print("Errors:", response.errors)
-    
+
     # Handle the response
     content = response.choices[0].message.content
     if content:
         return content
-# Example usage:
-#result = gptapi('goalplanner', "Architect, plan, and design a program that facilitates the use of asymmetric encryption protocols (RSA, elliptic curve). Specifically, it should be designed as a practical example program, allowing encryption, decryption, key generation, etc, all while providing succinct explanations. This program will be used to run practical examples of these encryptions methods such that the user can gain a practical example of the process. This program should be modular such that different encryotion protocols, different modes of operations, etc, all are easily possible in the future. Do it in python using flask.")
-#print(result)
+
+
+if __name__ == "__main__":
+    response = None  # Initialize response to handle undefined variable
+
+    # Example usage
+    try:
+        result = gptapi(
+            'goalplanner',
+            "Architect, plan, and design a program that facilitates the use of asymmetric encryption protocols."
+        )
+        print(result)
+        response = result  # Capture the response for further inspection
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    # Print token usage if it's available
+    if response and hasattr(response, 'usage'):
+        print("Token Usage:", response.usage)
+
+    # Print errors if they exist
+    if response and hasattr(response, 'errors'):
+        print("Errors:", response.errors)

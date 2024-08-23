@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 from gptapi import gptapi
 
 def read_prompt_from_file(file_path):
@@ -14,7 +13,7 @@ def read_prompt_from_file(file_path):
     """
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
-            prompt = file.read()#.strip()
+            prompt = file.read().strip()
         return prompt
     except FileNotFoundError:
         logging.error("The file %s does not exist.", file_path)
@@ -29,7 +28,7 @@ def main():
     """
     try:
         # Define the profile name and input file path
-        profile_name = 'goalplanner'  # The YAML profile file name without the extension
+        profile_name = 'cot'  # The YAML profile file name without the extension
         input_file_path = './input.txt'  # Path to the input file containing the prompt
 
         # Read the prompt from the input file
