@@ -7,7 +7,7 @@ To clone this repository with all its submodules, use the following command:
 git clone --recurse-submodules https://github.com/zephyrgoose/gptapi.git
 ```
 
-If you've already cloned the repository without --recurse-submodules, you can initialize and update the submodules with:
+If you've already cloned the repository without `--recurse-submodules`, you can initialise and update the submodules with:
 ```bash
 git submodule update --init --recursive
 ```
