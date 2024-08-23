@@ -1,6 +1,6 @@
 ## Cloning the Repository
 
-This repository uses submodulules!
+This repository uses submodules!
 To clone this repository with all its submodules, use the following command:
 
 ```bash
