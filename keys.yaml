@@ -4,3 +4,4 @@
 # Your OpenAI API key
 openai_api: sk-[YOUR_KEY_HERE]
 
+# generate API keys here: https://platform.openai.com/api-keys
