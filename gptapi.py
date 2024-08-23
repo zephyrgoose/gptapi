@@ -88,8 +88,8 @@ def gptapi(profile_name, prompt):
     )
     
     # Basic error handling
-    #if hasattr(response, 'usage'):
-    #    print("Token Usage:", response.usage)
+    if hasattr(response, 'usage'):
+        print("Token Usage:", response.usage)
     if hasattr(response, 'errors'):
         print("Errors:", response.errors)
     
@@ -97,7 +97,6 @@ def gptapi(profile_name, prompt):
     content = response.choices[0].message.content
     if content:
         return content
-
 # Example usage:
-#result = gptapi('webvulnscraper', "Today, CISA—in partnership with the Federal Bureau of Investigation (FBI)—released an update to joint Cybersecurity Advisory #StopRansomware: Royal Ransomware, etc.")
+#result = gptapi('goalplanner', "Architect, plan, and design a program that facilitates the use of asymmetric encryption protocols (RSA, elliptic curve). Specifically, it should be designed as a practical example program, allowing encryption, decryption, key generation, etc, all while providing succinct explanations. This program will be used to run practical examples of these encryptions methods such that the user can gain a practical example of the process. This program should be modular such that different encryotion protocols, different modes of operations, etc, all are easily possible in the future. Do it in python using flask.")
 #print(result)

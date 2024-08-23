@@ -67,11 +67,11 @@ def run_gptapi_until_json_fails(profile_name, prompt):
 
 def main():
     """
-    Main function to run the gptapi with the GoalPlanningSchema, using input from a file.
+    Main function to run the gptapi with the goalplanner profile, using input from a file.
     """
     try:
         # Define the profile name and input file path
-        profile_name = 'webvulnscraper'  # The YAML profile file name without the extension
+        profile_name = 'goalplanner'  # The YAML profile file name without the extension
         input_file_path = './input.txt'  # Path to the input file containing the prompt
 
         # Read the prompt from the input file

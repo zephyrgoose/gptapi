@@ -1,39 +1,12 @@
-Royal Ransomware Actors Rebrand as “BlackSuit,” FBI and CISA Release Update to Advisory
-
-Today, CISA—in partnership with the Federal Bureau of Investigation (FBI)—released an update to joint Cybersecurity Advisory #StopRansomware: Royal Ransomware,#StopRansomware: BlackSuit (Royal) Ransomware. The updated advisory provides network defenders with recent and historically observed tactics, techniques, and procedures (TTPs) and indicators of compromise (IOCs) associated with BlackSuit and legacy Royal activity. FBI investigations identified these TTPs and IOCs as recently as July 2024.
-[#StopRansomware: BlackSuit (Royal) Ransomware](https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-061a)
-BlackSuit ransomware attacks have spread across numerouscritical infrastructure sectorsincluding, but not limited to, commercial facilities, healthcare and public health, government facilities, and critical manufacturing.
-[critical infrastructure sectors](https://www.cisa.gov/topics/critical-infrastructure-security-and-resilience/critical-infrastructure-sectors)
-CISA encourages network defenders to review the updated advisory and apply the recommended mitigations. See#StopRansomwarefor additional guidance on ransomware protection, detection, and response. Visit CISA’sCross-Sector Cybersecurity Performance Goalsfor more information on the CPGs, including additional recommended baseline protections.
-[#StopRansomware](https://www.cisa.gov/stopransomware)
-[Cross-Sector Cybersecurity Performance Goals](https://www.cisa.gov/cross-sector-cybersecurity-performance-goals)
-CISA encourages software manufacturers to take ownership of improving the security outcomes of their customers by applying secure by design tactics. For more information on secure by design, see CISA’sSecure by Designwebpage and joint guideShifting the Balance of Cybersecurity Risk: Principles and Approaches for Secure by Design Software.
-[Secure by Design](https://www.cisa.gov/securebydesign)
-[Shifting the Balance of Cybersecurity Risk: Principles and Approaches for Secure by Design Software](https://www.cisa.gov/resources-tools/resources/secure-by-design)
-This product is provided subject to thisNotificationand thisPrivacy & Usepolicy.
-[Notification](https://www.cisa.gov/notification)
-[Privacy & Use](https://www.cisa.gov/privacy-policy)
-
-Please share your thoughts
-
-We recently updated our anonymousproduct survey; we’d welcome your feedback.
-[product survey](https://www.surveymonkey.com/r/CISA-cyber-survey?product=https://www.cisa.gov/news-events/alerts/2024/08/07/royal-ransomware-actors-rebrand-blacksuit-fbi-and-cisa-release-update-advisory)
-
-Related Advisories
+Architect, plan, and design a program that facilitates the use of asymmetric encryption protocols (RSA, elliptic curve).
+Specifically, it should be designed as a practical example program, allowing encryption, decryption, key generation, etc, all while providing succinct explanations.
+This program will be used to run practical examples of these encryptions methods such that the user can gain a practical example of the process.
+This program should be modular such that different encryotion protocols, different modes of operations, etc, all are easily possible in the future.
+Do it in python using flask.
 
 
-CISA Adds One Known Exploited Vulnerability to Catalog
 
-[CISA Adds One Known Exploited Vulnerability to Catalog](https://www.cisa.gov/news-events/alerts/2024/08/19/cisa-adds-one-known-exploited-vulnerability-catalog)
 
-CISA Adds One Known Exploited Vulnerability to Catalog
 
-[CISA Adds One Known Exploited Vulnerability to Catalog](https://www.cisa.gov/news-events/alerts/2024/08/15/cisa-adds-one-known-exploited-vulnerability-catalog)
 
-CISA Releases Eleven Industrial Control Systems Advisories
-
-[CISA Releases Eleven Industrial Control Systems Advisories](https://www.cisa.gov/news-events/alerts/2024/08/15/cisa-releases-eleven-industrial-control-systems-advisories)
-
-Adobe Releases Security Updates for Multiple Products
-
-[Adobe Releases Security Updates for Multiple Products](https://www.cisa.gov/news-events/alerts/2024/08/14/adobe-releases-security-updates-multiple-products)
+Architect, plan, and design a program that facilitates the use of asymmetric encryption protocols (RSA, elliptic curve). Specifically, it should be designed as a practical example program, allowing encryption, decryption, key generation, etc, all while providing succinct explanations. This program will be used to run practical examples of these encryptions methods such that the user can gain a practical example of the process. This program should be modular such that different encryotion protocols, different modes of operations, etc, all are easily possible in the future. Do it in python using flask.
