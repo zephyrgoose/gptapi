@@ -1,0 +1,6 @@
+# keys.yaml
+# Store sensitive credentials here. This file should not be shared publicly.
+
+# Your OpenAI API key
+openai_api: sk-[YOUR_KEY_HERE]
+
