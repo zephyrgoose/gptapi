@@ -1,4 +1,4 @@
 [submodule "profiles"]
 	path = profiles
-	url = https://github.com/zephyrgoose/gptapi-profiles-public.git
-#	url = https://github.com/[username]/[custom-forked-gptapi-profiles].git
+#	url = https://github.com/zephyrgoose/gptapi-profiles-public.git
+	url = https://github.com/zephyrgoose/gptapi-profiles-private.git
