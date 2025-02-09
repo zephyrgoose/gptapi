@@ -123,8 +123,8 @@ def gptapi(profile_name, prompt):
 if __name__ == "__main__":
     try:
         result = gptapi(
-            "weather",  # Assuming you create a 'weather.yaml' profile
-            "What's the current weather in Chadstone, Victoria, Australia?"
+            "weather", 
+            "What's the current weather in Chadstone?"
         )
         print("RESULT:", result)
     except Exception as e:
