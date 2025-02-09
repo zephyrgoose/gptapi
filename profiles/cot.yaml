@@ -3,7 +3,7 @@
 # It includes all necessary parameters, with the actual API keys stored in a separate keys.yaml file.
 
 # Model to be used. 
-model: gpt-4o-2024-08-06
+model: gpt-4o
 #model: gpt-4o-mini-2024-07-18
 
 credentials_file: ./keys.yaml
