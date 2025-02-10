@@ -26,7 +26,28 @@ def load_api_key():
     return keys["openweather_api"]
 
 def get_current_weather(city):
-    """Fetches the current weather for a specified city using the OpenWeatherMap API."""
+    """
+    Fetches the current weather for a specified city using the OpenWeatherMap API.
+
+    This function retrieves weather details such as temperature, humidity, pressure, 
+    wind speed, and a short description of the current weather conditions.
+
+    Args:
+        city (str): The name of the city for which to retrieve weather data.
+
+    Returns:
+        dict: A dictionary containing the following weather information:
+            - "description" (str): A short description of the weather (e.g., "clear sky").
+            - "temperature" (float): The current temperature in degrees Celsius.
+            - "humidity" (int): The humidity percentage.
+            - "pressure" (int): The atmospheric pressure in hPa.
+            - "wind_speed" (float): The wind speed in metres per second.
+
+    Raises:
+        RuntimeError: If there is an error fetching weather data from the API.
+        ValueError: If the API key is missing or invalid.
+    """
+    
     api_key = load_api_key()
 
     base_url = "http://api.openweathermap.org/data/2.5/weather"
