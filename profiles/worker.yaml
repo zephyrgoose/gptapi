@@ -1,0 +1,50 @@
+model: gpt-4o
+credentials_file: ./keys.yaml
+
+system_prompt: |
+  You are an intelligent assistant capable of retrieving stock prices and weather data.
+  - If the user asks about stock prices, call `get_stock_price` with the stock symbol.
+  - If the user asks about the weather, call `get_current_weather` with the city name.
+
+structured_output: true
+tool_choice: auto
+
+parameters:
+  max_tokens: 300
+  temperature: 0.7
+  top_p: 1.0
+  n: 1
+  stop: None
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+
+tools:
+  - type: function
+    function:
+      name: get_current_weather
+      description: Retrieves the current weather for a specified city.
+      strict: true
+      parameters:
+        type: object
+        properties:
+          city:
+            type: string
+            description: The name of the city to get the weather for.
+        additionalProperties: false
+        required:
+          - city
+
+  - type: function
+    function:
+      name: get_stock_price
+      description: Retrieves the latest stock price for a given stock symbol.
+      strict: true
+      parameters:
+        type: object
+        properties:
+          symbol:
+            type: string
+            description: The stock symbol (e.g., AAPL for Apple, TSLA for Tesla).
+        additionalProperties: false
+        required:
+          - symbol

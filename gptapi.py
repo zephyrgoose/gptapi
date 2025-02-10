@@ -2,11 +2,12 @@ import os
 import json
 import yaml
 import logging
-import openai  # Ensure OpenAI is installed
-from custom_functions import get_current_weather  # Import custom function
+import openai
+import importlib.util
+import argparse
 
 # Configure logging
-logging.basicConfig(filename="api_debug.log", level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(filename="debug.log", level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def load_yaml(file_path):
     """Loads and parses a YAML file."""
@@ -27,6 +28,10 @@ def validate_config(config, required_fields):
 def load_profile(profile_name, profiles_dir):
     """Loads and validates the profile from a YAML configuration file."""
     profile_filename = os.path.join(profiles_dir, f"{profile_name}.yaml")
+    
+    if not os.path.exists(profile_filename):
+        raise FileNotFoundError(f"Profile '{profile_name}' not found at {profile_filename}")
+
     profile = load_yaml(profile_filename)
     required_fields = ["model", "system_prompt", "parameters"]
     validate_config(profile, required_fields)
@@ -37,31 +42,53 @@ def load_api_key(keys_filename="./keys.yaml"):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     keys_filepath = os.path.join(current_dir, keys_filename)
     keys = load_yaml(keys_filepath)
+
     if "openai_api" not in keys:
         raise ValueError("Missing 'openai_api' in keys file.")
+    
     return keys["openai_api"]
+
+def load_function(function_name):
+    """Dynamically loads a function from the functions/ directory."""
+    function_file = f"{function_name}.py"
+    function_path = os.path.join(os.path.dirname(__file__), "functions", function_file)
+
+    if not os.path.exists(function_path):
+        logging.error(f"Function module {function_file} not found at path {function_path}.")
+        return None
+
+    try:
+        spec = importlib.util.spec_from_file_location(function_name, function_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        if hasattr(module, function_name):
+            logging.info(f"Successfully loaded function: {function_name} from {function_file}")
+            return getattr(module, function_name)
+        else:
+            logging.error(f"Function {function_name} not found inside {function_file}. Available attributes: {dir(module)}")
+            return None
+    except Exception as e:
+        logging.error(f"Error loading function {function_name}: {e}")
+        return None
 
 def gptapi(profile_name, prompt):
     """Main function to interact with the GPT API using the specified profile."""
-    # Determine paths
     current_dir = os.path.dirname(os.path.abspath(__file__))
     profiles_dir = os.path.join(current_dir, "profiles")
 
-    # Load profile and API key
-    profile = load_profile(profile_name, profiles_dir)
-    api_key = load_api_key(profile.get("credentials_file", "./keys.yaml"))
-
-    # Instantiate OpenAI client
-    client = openai.OpenAI(api_key=api_key)
-
-    # Prepare tool definitions and tool_choice from the profile YAML.
-    tools = profile.get("tools", [])
-    tool_choice = profile.get("tool_choice", "auto")
-
-    logging.info(f"Sending prompt to GPT API: {prompt}")
-    print(f"[DEBUG] Sending prompt to GPT API: {prompt}")
-
     try:
+        # Load profile and API key
+        profile = load_profile(profile_name, profiles_dir)
+        api_key = load_api_key(profile.get("credentials_file", "./keys.yaml"))
+
+        client = openai.OpenAI(api_key=api_key)
+
+        tools = profile.get("tools", [])
+        tool_choice = profile.get("tool_choice", "auto")
+
+        logging.info(f"Sending prompt to GPT API: {prompt}")
+
         response = client.chat.completions.create(
             model=profile["model"],
             messages=[
@@ -73,46 +100,57 @@ def gptapi(profile_name, prompt):
             **profile["parameters"]
         )
 
+        logging.debug(f"Raw OpenAI response: {response}")
+
         if not response.choices:
             logging.warning("GPT API returned no choices.")
             return None
 
         message = response.choices[0].message
-        # Log and print the raw response from OpenAI
-        logging.debug(f"GPT API Response: {message}")
-        print(f"[DEBUG] GPT API Response: {message}")
 
-        # Handle function calls
         if message.tool_calls:
             for tool_call in message.tool_calls:
                 function_name = tool_call.function.name
                 function_args = json.loads(tool_call.function.arguments)
-                logging.info(f"Tool call detected: {function_name} with arguments {function_args}")
-                print(f"[DEBUG] Tool call detected: {function_name} with arguments {function_args}")
+                logging.debug(f"Tool call detected: {function_name} with arguments {function_args}")
 
-                # Execute the function if recognized
-                if function_name == "get_current_weather":
-                    city = function_args.get("city")
-                    if not city:
-                        raise ValueError("City parameter is missing in function arguments.")
+                available_functions = [f.replace(".py", "") for f in os.listdir("functions") if f.endswith(".py")]
+                logging.info(f"Available functions: {available_functions}")
 
-                    logging.info(f"Executing function: {function_name} with city: {city}")
-                    print(f"[DEBUG] Executing function: {function_name} with city: {city}")
-                    weather_result = get_current_weather(city)
-                    logging.info(f"Function execution result: {weather_result}")
-                    print(f"[DEBUG] Function execution result: {weather_result}")
-                    return weather_result
+                if function_name in available_functions:
+                    function = load_function(function_name)
+                    if function:
+                        result = function(**function_args)
+                        logging.debug(f"Function execution result: {result}")
+                        return result
+                    else:
+                        logging.error(f"Function {function_name} was loaded but could not be executed.")
+                        return f"Function {function_name} could not be executed."
+                else:
+                    logging.warning(f"Function {function_name} is not available.")
+                    return f"Function {function_name} is not available."
 
         return message.content
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")
-        print(f"[ERROR] An error occurred: {e}")
         return None
 
+def main():
+    """Command-line interface for GPT API."""
+    parser = argparse.ArgumentParser(description="Run GPT API with a specified profile and prompt.")
+    
+    parser.add_argument(
+        "--profile", "-p", required=True, type=str, help="Specify the profile name (e.g., 'worker', 'weather')."
+    )
+    parser.add_argument(
+        "--prompt", "-q", required=True, type=str, help="Specify the user prompt."
+    )
+
+    args = parser.parse_args()
+    
+    result = gptapi(args.profile, args.prompt)
+    print("Result:", result)
+
 if __name__ == "__main__":
-    try:
-        result = gptapi("weather", "What's the current weather in Chadstone?")
-        print("RESULT:", result)
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    main()
