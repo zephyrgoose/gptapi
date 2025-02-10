@@ -109,29 +109,37 @@ def gptapi(profile_name, prompt):
         message = response.choices[0].message
 
         if message.tool_calls:
+            all_results = []
             for tool_call in message.tool_calls:
                 function_name = tool_call.function.name
                 function_args = json.loads(tool_call.function.arguments)
                 logging.debug(f"Tool call detected: {function_name} with arguments {function_args}")
 
+                # Your existing code to find and load the function
                 available_functions = [f.replace(".py", "") for f in os.listdir("functions") if f.endswith(".py")]
                 logging.info(f"Available functions: {available_functions}")
 
                 if function_name in available_functions:
-                    function = load_function(function_name)
-                    if function:
-                        result = function(**function_args)
+                    function_obj = load_function(function_name)
+                    if function_obj:
+                        result = function_obj(**function_args)
                         logging.debug(f"Function execution result: {result}")
-                        return result
+                        all_results.append({function_name: result})
                     else:
-                        logging.error(f"Function {function_name} was loaded but could not be executed.")
-                        return f"Function {function_name} could not be executed."
+                        msg = f"Function {function_name} could not be executed."
+                        logging.error(msg)
+                        all_results.append({function_name: msg})
                 else:
-                    logging.warning(f"Function {function_name} is not available.")
-                    return f"Function {function_name} is not available."
+                    msg = f"Function {function_name} is not available."
+                    logging.warning(msg)
+                    all_results.append({function_name: msg})
 
-        return message.content
+            # Now that we've processed all the tool calls, we can either:
+            # 1) Return them all as a list/dict, or
+            # 2) Possibly feed them back into GPT for further reasoning 
+            #    if you want GPT to do any "error handling" or summarizing.
 
+            return all_results
     except Exception as e:
         logging.error(f"An error occurred: {e}")
         return None

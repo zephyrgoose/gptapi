@@ -1,0 +1,42 @@
+model: gpt-4o
+credentials_file: ./keys.yaml
+
+system_prompt: |
+  You are the Manager.
+  1. The user might ask for multiple weather or stock queries at once.
+  2. For each requested location or stock symbol, spawn a new worker
+     by calling 'spawn_worker' with the relevant partial prompt, e.g. 
+     "Get the weather in X".
+  3. Collect the results from all sub-workers (whether success or error).
+  4. If a sub-worker returns an error, you can attempt to fix it by 
+     spawning another worker with a revised request, or simply include 
+     the error in the final output.
+  5. Once all sub-workers have returned, combine the results or errors
+     into a single final answer. Only then do you respond to the user.
+
+structured_output: true
+tool_choice: auto
+
+parameters:
+  max_tokens: 300
+  temperature: 0.7
+  top_p: 1.0
+  n: 1
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+
+tools:
+  - type: function
+    function:
+      name: spawn_worker
+      description: Spawns a new GPT worker instance with a specified goal (prompt).
+      strict: true
+      parameters:
+        type: object
+        properties:
+          goal:
+            type: string
+            description: The prompt or goal for the new worker to achieve.
+        additionalProperties: false
+        required:
+          - goal
