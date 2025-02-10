@@ -8,7 +8,6 @@ from custom_functions import get_current_weather  # Import custom function
 # Configure logging
 logging.basicConfig(filename="api_debug.log", level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
-
 def load_yaml(file_path):
     """Loads and parses a YAML file."""
     try:
@@ -19,13 +18,11 @@ def load_yaml(file_path):
     except yaml.YAMLError as exc:
         raise ValueError(f"Error parsing YAML file: {file_path} - {exc}")
 
-
 def validate_config(config, required_fields):
     """Validates that all required fields are present in the config."""
     for field in required_fields:
         if field not in config:
             raise ValueError(f"Missing required configuration field: {field}")
-
 
 def load_profile(profile_name, profiles_dir):
     """Loads and validates the profile from a YAML configuration file."""
@@ -35,7 +32,6 @@ def load_profile(profile_name, profiles_dir):
     validate_config(profile, required_fields)
     return profile
 
-
 def load_api_key(keys_filename="./keys.yaml"):
     """Loads the API key from a YAML file."""
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -44,7 +40,6 @@ def load_api_key(keys_filename="./keys.yaml"):
     if "openai_api" not in keys:
         raise ValueError("Missing 'openai_api' in keys file.")
     return keys["openai_api"]
-
 
 def gptapi(profile_name, prompt):
     """Main function to interact with the GPT API using the specified profile."""
@@ -59,11 +54,12 @@ def gptapi(profile_name, prompt):
     # Instantiate OpenAI client
     client = openai.OpenAI(api_key=api_key)
 
-    # Prepare function schemas from the profile, if any
+    # Prepare tool definitions and tool_choice from the profile YAML.
     tools = profile.get("tools", [])
+    tool_choice = profile.get("tool_choice", "auto")
 
     logging.info(f"Sending prompt to GPT API: {prompt}")
-    print(f"[DEBUG] Sending prompt to GPT API: {prompt}")  # Console proof
+    print(f"[DEBUG] Sending prompt to GPT API: {prompt}")
 
     try:
         response = client.chat.completions.create(
@@ -72,8 +68,8 @@ def gptapi(profile_name, prompt):
                 {"role": "system", "content": profile["system_prompt"]},
                 {"role": "user", "content": prompt}
             ],
-            tools=tools,  # Updated from functions to tools
-            tool_choice="auto",  # Updated from function_call to tool_choice
+            tools=tools,
+            tool_choice=tool_choice,
             **profile["parameters"]
         )
 
@@ -82,19 +78,17 @@ def gptapi(profile_name, prompt):
             return None
 
         message = response.choices[0].message
-
         # Log and print the raw response from OpenAI
         logging.debug(f"GPT API Response: {message}")
-        print(f"[DEBUG] GPT API Response: {message}")  # Console proof
+        print(f"[DEBUG] GPT API Response: {message}")
 
         # Handle function calls
         if message.tool_calls:
             for tool_call in message.tool_calls:
                 function_name = tool_call.function.name
                 function_args = json.loads(tool_call.function.arguments)
-
                 logging.info(f"Tool call detected: {function_name} with arguments {function_args}")
-                print(f"[DEBUG] Tool call detected: {function_name} with arguments {function_args}")  # Console proof
+                print(f"[DEBUG] Tool call detected: {function_name} with arguments {function_args}")
 
                 # Execute the function if recognized
                 if function_name == "get_current_weather":
@@ -103,29 +97,22 @@ def gptapi(profile_name, prompt):
                         raise ValueError("City parameter is missing in function arguments.")
 
                     logging.info(f"Executing function: {function_name} with city: {city}")
-                    print(f"[DEBUG] Executing function: {function_name} with city: {city}")  # Console proof
-
+                    print(f"[DEBUG] Executing function: {function_name} with city: {city}")
                     weather_result = get_current_weather(city)
-
                     logging.info(f"Function execution result: {weather_result}")
-                    print(f"[DEBUG] Function execution result: {weather_result}")  # Console proof
-
+                    print(f"[DEBUG] Function execution result: {weather_result}")
                     return weather_result
 
         return message.content
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")
-        print(f"[ERROR] An error occurred: {e}")  # Console proof
+        print(f"[ERROR] An error occurred: {e}")
         return None
-
 
 if __name__ == "__main__":
     try:
-        result = gptapi(
-            "weather", 
-            "What's the current weather in Chadstone?"
-        )
+        result = gptapi("weather", "What's the current weather in Chadstone?")
         print("RESULT:", result)
     except Exception as e:
         print(f"An error occurred: {e}")
