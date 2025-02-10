@@ -1,10 +1,12 @@
 model: gpt-4o
-
 credentials_file: ./keys.yaml
 
 system_prompt: |
   You are an assistant specialized in providing current weather information.
   When asked, respond by calling the get_current_weather function with the appropriate city.
+
+structured_output: true
+tool_choice: auto
 
 parameters:
   max_tokens: 150
@@ -20,11 +22,13 @@ tools:
     function:
       name: get_current_weather
       description: Retrieves the current weather for a specified city.
+      strict: true
       parameters:
         type: object
         properties:
           city:
             type: string
             description: The name of the city to get the weather for.
+        additionalProperties: false
         required:
           - city
