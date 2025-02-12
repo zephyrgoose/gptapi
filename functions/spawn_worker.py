@@ -1,13 +1,19 @@
+# spawn_worker.py
+
 import logging
 import subprocess
 import os
 import sys
 
+# Configure logging
 logging.basicConfig(
     filename="../debug.log",
     level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
+
+MAX_SPAWN_ATTEMPTS = 20
+_spawn_count = 0
 
 def spawn_worker(goal):
     """
@@ -17,17 +23,24 @@ def spawn_worker(goal):
         goal (str): The prompt or goal for the new worker to achieve.
 
     Returns:
-        dict: A dictionary with either:
-            {"output": "..."} or {"error": "..."} 
+        dict: A dictionary with either {"output": "..."} or {"error": "..."} 
     """
-    logging.info(f"Spawning new worker with goal: {goal}")
+    global _spawn_count
+    
+    # Enforce a maximum number of worker spawns
+    if _spawn_count >= MAX_SPAWN_ATTEMPTS:
+        logging.error("Reached maximum sub-worker spawn limit. Aborting.")
+        return {"error": "Max sub-worker spawns reached."}
+    
+    _spawn_count += 1
+    logging.info(f"Spawning new worker (count={_spawn_count}/{MAX_SPAWN_ATTEMPTS}) with goal: {goal}")
 
     script_path = os.path.join(os.path.dirname(__file__), "../gptapi.py")
     command = [
         sys.executable,
         script_path,
         "--profile",
-        "worker",            # <--- Points to the updated worker profile
+        "worker",  # Assumes worker profile handles specific functions
         "--prompt",
         goal
     ]

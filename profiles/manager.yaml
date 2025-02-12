@@ -1,42 +1,78 @@
 model: gpt-4o
 credentials_file: ./keys.yaml
-
 system_prompt: |
-  You are the Manager.
-  1. The user might ask for multiple weather or stock queries at once.
-  2. For each requested location or stock symbol, spawn a new worker
-     by calling 'spawn_worker' with the relevant partial prompt, e.g. 
-     "Get the weather in X".
-  3. Collect the results from all sub-workers (whether success or error).
-  4. If a sub-worker returns an error, you can attempt to fix it by 
-     spawning another worker with a revised request, or simply include 
-     the error in the final output.
-  5. Once all sub-workers have returned, combine the results or errors
-     into a single final answer. Only then do you respond to the user.
+  You are the Manager AI.
 
-structured_output: true
-tool_choice: auto
+  YOUR RULES:
+  1) You may call "spawn_worker" if you truly need more information from a Worker.  
+  2) You can do multiple steps if needed. However, once you are done and your purpose is complete, you MUST provide 'output' in your JSON. Example:
+    {
+      "currentState": "...",
+      "reasoning": "...",
+      "toolCalls": [],
+      "output": "FINAL ANSWER HERE"
+    }
+  3) If you keep calling tools but never provide 'output', the system will think you are stuck in a loop. Only call spawn_worker if you truly need more. Otherwise, conclude.
+  IMPORTANT:  
+  - If you do not specify "output", the system will assume you want to continue.  
+  - Provide your chain-of-thought or reasoning in an internal manner if needed,
+    but the final user-facing JSON must have "output".
 
 parameters:
-  max_tokens: 300
+  max_tokens: 1000
   temperature: 0.7
   top_p: 1.0
   n: 1
-  frequency_penalty: 0.0
-  presence_penalty: 0.0
+
+tool_choice: auto
+
+structured_output:
+  name: ManagerReasoning
+  strict: true
+  schema:
+    type: object
+    properties:
+      currentState:
+        type: string
+        description: Describes what's currently happening.
+      reasoning:
+        type: string
+        description: Explains why this is happening.
+      toolCalls:
+        type: array
+        description: Lists any function or tool calls being used.
+        items:
+          type: object
+          properties:
+            toolName:
+              type: string
+              description: The name of the tool or function being called.
+          required:
+            - toolName
+          additionalProperties: false
+      output:
+        type:
+          - string
+          - "null"
+        description: The final result and/or information to be returned to the user.
+    required:
+      - currentState
+      - reasoning
+      - toolCalls
+      - output
+    additionalProperties: false
 
 tools:
   - type: function
     function:
       name: spawn_worker
-      description: Spawns a new GPT worker instance with a specified goal (prompt).
+      description: "Spawns a new GPT worker instance..."
       strict: true
       parameters:
         type: object
         properties:
           goal:
             type: string
-            description: The prompt or goal for the new worker to achieve.
+            description: "Prompt or goal for the worker."
+        required: ["goal"]
         additionalProperties: false
-        required:
-          - goal
